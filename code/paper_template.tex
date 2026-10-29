@@ -1,0 +1,222 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Pagella}
+\newfontfamily\headfont{Inter}[UprightFont=*-ExtraBold,BoldFont=*-ExtraBold,Extension=.otf,Path=/usr/share/fonts/opentype/inter/]
+\usepackage[a4paper,margin=2.3cm]{geometry}
+\usepackage{graphicx,booktabs,float,caption,array}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+\usepackage{setspace}
+\setstretch{1.05}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\titleformat{\section}{\headfont\Large}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\headfont\large}{\thesubsection}{0.8em}{}
+\captionsetup{font=small,labelfont=bf}
+\urlstyle{same}
+\hypersetup{pdftitle={Has Your Surname Left Home? Birthplaces of Notable People by Surname in Great Britain, 1800 to 1899 and 1950 Onwards},pdfauthor={Tristan Hotham}}
+
+\begin{document}
+\begin{center}
+{\Large\bfseries Has Your Surname Left Home?\\[2pt] Birthplaces of Notable People by Surname in Great Britain,\\[2pt] 1800 to 1899 and 1950 Onwards\par}
+\vspace{1.2em}
+{\large Tristan Hotham\par}
+\vspace{0.3em}
+{\small Independent researcher\\
+ORCID: 0000-0003-4931-9349\\
+DOI: \href{https://doi.org/10.5281/zenodo.23761427}{https://doi.org/10.5281/zenodo.23761427}\par}
+\vspace{0.8em}
+2026
+\end{center}
+
+\begin{quote}
+\small
+\begin{center}\textbf{Abstract}\end{center}
+British surnames are often tied to a region, but the open data needed to measure that for the whole population do not exist: the 1881 census with names is available only under a special licence, and modern name registers are not open. This note uses an open alternative and is explicit about its bias. From Wikidata I take {{overview.n_people|int}} notable people born in Great Britain since 1700 who have a family name and a mapped birthplace, and compare where bearers of each surname were born in the nineteenth century ({{overview.eras.1800s.n|int}} people) and from 1950 onwards ({{overview.eras.since1950.n|int}}). The sample is skewed: men are {{page.men_1800s|pct}} of those born in the 1800s, and about one in four of them was born in London. For {{regional.n_surnames|int}} surnames with at least {{regional.nmin}} notable births in both periods, a size-adjusted dissimilarity index shows that regional clustering beyond chance fell by {{page.excess_drop|pct}} at the median, from {{page.excess_1800s_pts}} to {{page.excess_since1950_pts}} percentage points, and {{regional.excess_drop_share|pct}} of surnames became less regional. Notable people with Welsh patronymic surnames were born in Wales {{welsh.eras.1800s.share_wales|pct}} of the time in the 1800s and {{welsh.eras.since1950.share_wales|pct}} since 1950. Tre-, Pol- and Pen- surnames were born in Cornwall about {{page.corn_lift_1800s|int}} times as often as notable people in general in the 1800s. Surnames that match a British place name were born within {{placenames.radius_km|int}} km of a namesake {{placenames.eras.1800s.lift|f1}} times as often as chance in the 1800s and {{placenames.eras.since1950.lift|f1}} times since 1950. Against Scotland's registers, notable counts track the commonest surnames well (Spearman {{nrs.spearman_since1950|f2}}). The author's own surname, Hotham, has only {{hotham.n_gb|int}} notable births, a reminder that the method is rich for common names and thin for most.
+
+\textbf{Keywords:} surnames; family names; Wikidata; regional geography; Great Britain; Welsh surnames; Cornish surnames; toponymic surnames; open data; notability bias
+\end{quote}
+
+\section{Introduction}
+
+Many British surnames still carry an address. Jones and Davies point to Wales, Tre- names to Cornwall, Mac and Mc to Scotland, and a large share of English surnames name a place: the village, hamlet or farm that a medieval bearer came from. Geographers have mapped these patterns for the whole population using the 1881 census and modern electoral registers, showing strong and persistent regional surname geographies (Longley, Cheshire and Mateos 2011). The question this note began with was simple: where did each surname cluster in 1881, and where does it cluster today?
+
+The honest answer is that this cannot be done with open data. The Integrated Census Microdata (I-CeM) for 1851 to 1911 are held by the UK Data Service; the safeguarded version contains no names or addresses, and names are released only under a special licence (Schürer and Higgs 2020; Schürer and Higgs 2024). Volunteer transcriptions of the census forbid reproduction of extracted data, and modern surname data built from electoral rolls and consumer registers sit in a trusted research environment that third parties cannot access (Lansley, Li and Longley 2019). There is no open table of surnames by area for Great Britain.
+
+So this note asks a narrower question that open data can answer. Wikidata, the collaborative knowledge base behind Wikipedia (Vrandečić and Krötzsch 2014), records family names and places of birth for tens of thousands of people born in Britain. These people are notable, not typical, and the bias is large. But they span three centuries, they are released under CC0, and anyone can repeat the analysis. How far did notable bearers of each surname move away from their surname's home region between those born in the 1800s and those born since 1950? Does a well-known surname geography (Welsh patronymics, Cornish Tre, Pol and Pen, and surnames that are also place names) show up in this sample, and does it fade?
+
+The interactive version, with a search for any surname that has at least two notable births, is at \url{https://maps.tristanhotham.com/surname-birthplaces/}.
+
+\section{Data}
+
+\subsection{People}
+
+I queried Wikidata on {{meta.retrieved}} through the QLever SPARQL endpoint (Bast and Buchhold 2017) for every human (P31 Q5) with a family name (P734), a place of birth (P19) with coordinates (P625) and a date of birth (P569) in 1700 or later, where the birthplace's country (P17) is the United Kingdom or one of its predecessors (the United Kingdom of Great Britain and Ireland, the Kingdoms of England, Scotland and Great Britain). For each person and family name I kept the earliest birth year, one set of birthplace coordinates, sex (P21) and the English label of the family-name item. This returned {{meta.n_rows_raw|int}} person and surname pairs for {{meta.n_people_raw|int}} people.
+
+\subsection{Places}
+
+Each birthplace was attached to the nearest populated place in OS Open Names (Ordnance Survey 2026) and kept only if that place lay within 10 km. This defines Great Britain: Northern Ireland, the Isle of Man and the Channel Islands, which OS Open Names does not cover, drop out, as do a few misplaced coordinates. {{overview.n_people|int}} people with {{overview.n_surnames|int}} distinct surname labels remain, born at {{overview.n_birthplaces|int}} distinct birthplaces. Each birthplace takes the region or nation and the county or unitary authority of its nearest OS Open Names place; the {{page.n_regions}} units are Scotland, Wales and the nine former English regions.
+
+\subsection{Scotland's registers}
+
+National Records of Scotland publishes the surnames that occur most often in Scotland's birth, marriage and death registers each year, with counts, under the Open Government Licence v3.0 (National Records of Scotland 2026). I used the top {{nrs.n}} surnames of 2025 as an external check.
+
+\subsection{Context}
+
+Lists of Welsh patronymic surnames and the Tre, Pol and Pen rhyme come from the English Wikipedia articles on Welsh surnames and on Tre, Pol and Pen, and the Hotham example from the articles on the surname and on the village (all CC BY-SA 4.0, retrieved with the Wikidata query).
+
+\section{Methods}
+
+\textbf{Eras.} Births are grouped as 1700 to 1799, 1800 to 1899, 1900 to 1949 and 1950 onwards. The main comparison is between the 1800s and 1950 onwards; the other eras are shown for context.
+
+\textbf{Regional clustering.} For a surname in an era, let $s_r$ be the share of its notable births in region $r$, and $p_r$ the share of all notable births of that era in region $r$. The dissimilarity index $D = \frac{1}{2}\sum_r |s_r - p_r|$ (Duncan and Duncan 1955) is the share of the surname's births that would have to move region to match the general pattern. Because $D$ is inflated for small samples, I compute it on random subsamples of the same size $m$ in both eras ($m$ is the smaller of the two counts, capped at {{regional.cap}}; 200 draws) and subtract the mean $D$ for random samples of $m$ births from all notable births of that era (300 draws). The result, which I call regional clustering beyond chance, is reported in percentage points. Only surnames with at least {{regional.nmin}} notable births in both eras are used ({{regional.n_surnames|int}} surnames). I also record each surname's centre of gravity (mean position of births) and the region where it is most over-represented (location quotient $s_r / p_r$, with at least three births).
+
+\textbf{Signature surnames.} For each region and era, the surnames with the highest location quotient, among those with at least six notable births in the region and eight in Great Britain.
+
+\textbf{Welsh patronymics.} The {{page.n_welsh}} patronymic surnames named in Wikipedia's article on Welsh surnames: Jones, Williams, Davies, Evans, Thomas, Roberts, Edwards, Powell, Price, Pryce, Pugh, Pritchard, Bowen and Upjohn. I report the share of notable people with these surnames born in Wales, against the share of all notable births in Wales.
+
+\textbf{Tre, Pol and Pen.} Every surname beginning with Tre, Pol or Pen followed by a lower-case letter ({{cornish.prefix.Tre.n_names}}, {{cornish.prefix.Pol.n_names}} and {{cornish.prefix.Pen.n_names}} surnames). This is deliberately generous: it includes Welsh names such as Trevor and English names such as Penn and Pennington.
+
+\textbf{Place-name surnames.} Surnames of four or more letters that exactly match the name of one, two or three cities, towns or villages in OS Open Names ({{placenames.n_surnames|int}} surnames). For each era I compute the share of bearers born within {{placenames.radius_km|int}} km of the nearest namesake, and the share expected if bearers were born like notable people in general (from a random sample of 8,000 notable births per era). The ratio is the namesake pull. A spelling match does not establish the origin of any single surname.
+
+\textbf{Scotland.} For the top {{nrs.n}} surnames in the 2025 registers, I compare register entries with notable people born in Scotland since 1950, matching names without regard to capital letters (the registers write Mcdonald, Wikidata McDonald), using Spearman's rank correlation.
+
+\section{Results}
+
+\subsection{Who is in the sample}
+
+Table~\ref{tab:eras} and Figure~\ref{fig:regions} describe the sample. It grows over time, from {{overview.eras.1700s.n|int}} people born in the 1700s to {{overview.eras.since1950.n|int}} born from 1950 onwards. Women are {{page.women_1800s|pct}} of those born in the 1800s and {{page.women_since1950|pct}} of those born since 1950. London accounts for {{page.london_1800s|pct}} and {{page.london_since1950|pct}} of births in these two eras, far more than its share of the population. Scotland's share falls from {{overview.eras.1800s.regions.Scotland|pct}} to {{overview.eras.since1950.regions.Scotland|pct}} and Wales's from {{overview.eras.1800s.regions.Wales|pct}} to {{overview.eras.since1950.regions.Wales|pct}}, while the North West, Yorkshire and the North East grow. These shifts in where notable people were born are the baseline against which each surname is measured.
+
+{{TABLE_ERAS}}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{b_regions.png}
+\caption{Share of each era's notable births in each region or nation of Great Britain, people born 1800 to 1899 and 1950 onwards.}
+\label{fig:regions}
+\end{figure}
+
+\subsection{Surnames became less regional}
+
+For the median surname, regional clustering beyond chance fell from {{page.excess_1800s_pts}} percentage points for births in the 1800s to {{page.excess_since1950_pts}} for births since 1950, a fall of {{page.excess_drop|pct}}. {{regional.excess_drop_share|pct}} of the {{regional.n_surnames|int}} surnames fell (Figure~\ref{fig:scatter}). The region of greatest over-representation was the same in both eras for {{regional.same_top_share|pct}} of surnames. The median surname's centre of gravity moved {{regional.shift_median_km|int}} km, against {{regional.base_shift_km|int}} km for all notable births together.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{b_scatter.png}
+\caption{Regional clustering beyond chance for {{regional.n_surnames|int}} surnames with at least {{regional.nmin}} notable births in both eras, born 1800 to 1899 (horizontal) and 1950 onwards (vertical). Points below the diagonal became less regional. Point size reflects the number of births.}
+\label{fig:scatter}
+\end{figure}
+
+The most regional surnames in the nineteenth century were Welsh and Scottish (Table~\ref{tab:top}). Most remain regional, at roughly half their earlier level. A few Scottish names (Paterson, Thomson, Robertson) held their level, and Robson, a North East name, rose.
+
+{{TABLE_TOP}}
+
+Table~\ref{tab:sig} lists the signature surnames of each region. In the nineteenth century these include clear regional names (Rees in Wales, Stansfield and Firth in Yorkshire, Ashworth and Royle in the North West, Elliot and Liddell in the North East), but also single notable families, such as aristocratic and banking dynasties in London. The same mix appears for births since 1950, where several London names reflect recent migration as well as old families.
+
+{{TABLE_SIG}}
+
+\subsection{Welsh patronymics}
+
+Of notable people with the {{page.n_welsh}} Welsh patronymic surnames, {{welsh.eras.1800s.share_wales|pct}} of those born in the 1800s were born in Wales, against {{welsh.eras.1800s.base_wales|pct}} of all notable births (Figure~\ref{fig:welshmap} and Figure~\ref{fig:tests}). For those born since 1950 the share is {{welsh.eras.since1950.share_wales|pct}}, against {{welsh.eras.since1950.base_wales|pct}}. The concentration remains several times the general rate, but most notable bearers are now born in England, especially in London ({{page.welsh_london|int}}) and the North West ({{page.welsh_nw|int}}). Jones has {{welsh.jones_n|int}} notable births in the data, more than any other surname.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{b_welsh_map.png}
+\caption{Notable births with the {{page.n_welsh}} Welsh patronymic surnames, born 1800 to 1899 (left) and 1950 onwards (right), in England and Wales. Circle area shows births at each birthplace.}
+\label{fig:welshmap}
+\end{figure}
+
+\subsection{Tre, Pol and Pen}
+
+Cornwall is small in this sample: {{cornish.n_cornwall_births_all|int}} notable births in all, under 1\% of every era. {{cornish.eras.1800s.share_cornwall|pct1}} of notable people with Tre-, Pol- or Pen- surnames born in the 1800s were born in Cornwall, about {{page.corn_lift_1800s|int}} times the general rate, and {{cornish.eras.since1950.share_cornwall|pct1}} of those born since 1950 (Figure~\ref{fig:tests}). The commonest Tre- surnames in the data (Trevor, Trevelyan, Trefusis) have no Cornish-born notables at all, which reflects both false friends and landed or naval families born away from Cornwall.
+
+\subsection{Surnames that are place names}
+
+Among {{placenames.n_surnames|int}} surnames that match a British city, town or village, {{placenames.eras.1800s.near_share|pct1}} of bearers born in the 1800s were born within {{placenames.radius_km|int}} km of a namesake, against {{placenames.eras.1800s.expected_share|pct1}} expected, a ratio of {{placenames.eras.1800s.lift|f1}}. For those born since 1950 the figures are {{placenames.eras.since1950.near_share|pct1}} against {{placenames.eras.since1950.expected_share|pct1}}, a ratio of {{placenames.eras.since1950.lift|f1}}. The pull is strongest for the 1700s ({{placenames.eras.1700s.lift|f1}}). Most matches are far from their namesake in every era, as expected when many matches are coincidences of spelling, but the decline is clear. Northern names give the sharpest cases: {{page.haigh_near}} of {{page.haigh_n}} Haighs born in the 1800s were born within {{placenames.radius_km|int}} km of the village of Haigh near Barnsley, and {{page.lees_near}} of {{page.lees_n}} Leeses near Lees by Oldham or Lees in Derbyshire; none of the Haighs or Leeses born since 1950 were (Figure~\ref{fig:hotham}).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{b_tests.png}
+\caption{Three tests by era. Bars: share of notable people with Welsh patronymic surnames born in Wales; with Tre-, Pol- or Pen- surnames born in Cornwall; and with place-name surnames born within {{placenames.radius_km|int}} km of a namesake. Black lines: the same share for all notable births of the era.}
+\label{fig:tests}
+\end{figure}
+
+\subsection{Hotham}
+
+The author's surname illustrates the limits. Hotham is a village in the East Riding of Yorkshire (population {{hotham.wiki_village_pop2011|int}} at the 2011 census), the only place of that name in OS Open Names, and its Wikipedia article records that it was once the land of Sir John Hotham, 1st Baronet, Governor of Hull, with the family estate now at nearby South Dalton. Wikipedia's page for the surname lists {{hotham.wiki_people_listed|int}} people. Only {{hotham.n_gb|int}} notable Hothams in Wikidata have a family name and a birthplace in Great Britain from 1700 on: one born in {{hotham.births.0.year}} near {{hotham.births.0.near}} in {{hotham.births.0.area}}, {{hotham.births.0.km_from_village|int}} km from the village, and one born in {{hotham.births.1.year}} in {{hotham.births.1.near}}, {{hotham.births.1.km_from_village|int}} km away (Figure~\ref{fig:hotham}). Two births cannot show a pattern; {{page.le2_share|pct}} of all surnames in the data have two notable births or fewer.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{b_hotham_haigh.png}
+\caption{Two place-name surnames and their namesake villages (diamonds from OS Open Names): Hotham, with two notable births, both in the 1800s; and Haigh, whose nineteenth-century births cluster near the village and whose births since 1950 do not.}
+\label{fig:hotham}
+\end{figure}
+
+\subsection{A check against Scotland's registers}
+
+For Scotland's {{nrs.n}} commonest surnames in the 2025 registers, the number of notable people born in Scotland since 1950 rises closely with register entries (Spearman correlation {{nrs.spearman_since1950|f2}}; {{nrs.spearman_1800s|f2}} for people born in the 1800s; Figure~\ref{fig:nrs}). Smith leads both lists, with {{nrs.smith_notable|int}} notable births since 1950. Some names are over-represented among notable people relative to the registers (Mckenzie, Kerr, Mclaughlin, Gibson) and some under-represented (Johnstone, with none, then Dickson, Green and Hill), partly because spellings differ between sources. For common names, then, the notable sample is a reasonable guide to relative frequency, though not to absolute numbers.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{b_nrs.png}
+\caption{Scotland's {{nrs.n}} commonest surnames: entries in the 2025 birth, marriage and death registers (log scale) against notable people born in Scotland since 1950 in Wikidata.}
+\label{fig:nrs}
+\end{figure}
+
+\section{Discussion}
+
+Three results hold across the tests. First, notable bearers of regional surnames were born far less often in their surname's home region in the late twentieth century than in the nineteenth: the median surname lost about half of its regional clustering beyond chance, and the share of Welsh patronymic notables born in Wales nearly halved. Second, the old geography has not gone: Welsh, Scottish and Cornish names are still over-represented at home, and place-name surnames are still born near their namesakes about twice as often as chance. Third, the pull of home was strongest in the eighteenth century in every test, which fits a long, gradual dispersal rather than a single break.
+
+These results describe the notable, and the notable moved more than most people. Many were born to families of professionals, clergy, officers and aristocrats whose children were born where the family happened to be posted or living. Births since 1950 include far more sportspeople, entertainers and politicians, whose birthplaces may be more representative. The comparison between eras therefore mixes two changes: real dispersal of surnames, and change in who counts as notable. The check against Scotland's registers suggests that, for common names, notable counts follow population counts reasonably well, but it cannot test geography within a country.
+
+The findings are consistent in direction with work on full-population data, which finds that surname regions remain recognisable today after much mixing (Longley, Cheshire and Mateos 2011). This note does not replicate that work; it shows what can be done openly, and where open data stop.
+
+\section{Limitations}
+
+The sample is not a census and is heavily biased by sex, class, occupation, birthplace and the interests of Wikidata's volunteers. London's weight is large in every era, and "London" is often a single point for a city of millions. A birthplace may be recorded as a town or city rather than a parish. Surnames are Wikidata labels, so spelling variants are separate and a few family-name items with the same label are merged. People with two family names count under each. Coverage of recent sportspeople and politicians is better than of nineteenth-century farmers or factory workers, and coverage of women is poor in every era. Place-name matches are spelling matches only, and the Tre, Pol and Pen test includes false friends. Northern Ireland is excluded. For most surnames the counts are too small to show anything, as the Hotham example makes plain.
+
+\section{Conclusion}
+
+With open data alone, one cannot map where every surname clustered in 1881. One can map where notable bearers were born, and that portrait, read with its biases in view, shows British surnames leaving home: less regional for those born since 1950 than for those born in the 1800s, but still recognisably Welsh, Scottish, Cornish or tied to a place. The full-population question remains open to anyone with access to the licensed census data; the methods here would transfer directly.
+
+\section*{Data and code availability}
+
+Data, code and the interactive page: GitHub, \url{https://github.com/Tristan-Hotham/surname-birthplaces}; interactive version, \url{https://maps.tristanhotham.com/surname-birthplaces/}; archived release, \url{https://doi.org/10.5281/zenodo.23761427}. The repository holds aggregate counts of notable births by surname, era and region (surname\_era\_region.csv), the regional measures for each surname, the signature surnames, the Welsh, place-name and Scottish comparisons, and all code. It does not publish lists of individual people.
+
+Sources: Wikidata (CC0 1.0); OS Open Names, contains OS data © Crown copyright and database right 2026 (Open Government Licence v3.0); National Records of Scotland, © Crown copyright (Open Government Licence v3.0); ONS boundaries (Open Government Licence v3.0); English Wikipedia (CC BY-SA 4.0).
+
+\section*{AI statement}
+
+I wrote the text, with drafting and editing assistance from Claude (Anthropic), which also helped prepare the analysis code. I reviewed and checked all text and results.
+
+\section*{References}
+\small
+\setlength{\parskip}{0.35em}
+
+Bast, H. and Buchhold, B. (2017) QLever: a query engine for efficient SPARQL+Text search. In \textit{Proceedings of the 2017 ACM Conference on Information and Knowledge Management (CIKM)}. \url{https://qlever.cs.uni-freiburg.de/}
+
+Duncan, O. D. and Duncan, B. (1955) A methodological analysis of segregation indexes. \textit{American Sociological Review}, 20(2), 210 to 217.
+
+Lansley, G., Li, W. and Longley, P. A. (2019) Creating a linked consumer register for granular demographic analysis. \textit{Journal of the Royal Statistical Society Series A}, 182(4), 1587 to 1605. \url{https://doi.org/10.1111/rssa.12476}
+
+Longley, P. A., Cheshire, J. A. and Mateos, P. (2011) Creating a regional geography of Britain through the spatial analysis of surnames. \textit{Geoforum}, 42(4), 506 to 516.
+
+National Records of Scotland (2026) Most common surnames, 2025. \url{https://nrscotland.gov.uk/publications/most-common-surnames-2025/}
+
+Ordnance Survey (2026) OS Open Names. \url{https://www.ordnancesurvey.co.uk/products/os-open-names}
+
+Schürer, K. and Higgs, E. (2020) Integrated Census Microdata (I-CeM) Names and Addresses, 1851 to 1911: Special Licence Access. 2nd edn. UK Data Service, SN 7856. \url{https://doi.org/10.5255/UKDA-SN-7856-2}
+
+Schürer, K. and Higgs, E. (2024) Integrated Census Microdata (I-CeM), 1851 to 1911. UK Data Service, SN 7481. \url{https://doi.org/10.5255/UKDA-SN-7481-3}
+
+Vrandečić, D. and Krötzsch, M. (2014) Wikidata: a free collaborative knowledgebase. \textit{Communications of the ACM}, 57(10), 78 to 85.
+
+Wikipedia contributors (2026) Welsh surnames; Tre, Pol and Pen; Hotham; Hotham, East Riding of Yorkshire. English Wikipedia, CC BY-SA 4.0. \url{https://en.wikipedia.org/wiki/Welsh_surnames}
+
+Wikidata contributors (2026) Wikidata. \url{https://www.wikidata.org/}, CC0 1.0.
+
+\end{document}

@@ -1,0 +1,56 @@
+// Test screenshots with Playwright (headless Chromium). Usage: node code/shots.js http://localhost:8793/ /dev/shm/sbp_shots
+const { chromium } = require('playwright');
+(async () => {
+  const [url, dir] = process.argv.slice(2);
+  const b = await chromium.launch();
+  const errs = [];
+  async function page(w, h) {
+    const p = await b.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
+    await p.route(/cdnjs\.cloudflare\.com\/ajax\/libs\/leaflet\/1\.9\.4\/(leaflet\.min\.(js|css))/, r => { const f = r.request().url().endsWith('.js') ? 'leaflet.js' : 'leaflet.css'; r.fulfill({ path: '/tmp/claude-0/lf/node_modules/leaflet/dist/' + f }); });
+    await p.route(/fonts\.(googleapis|gstatic)\.com|arcgisonline/, r => r.fulfill({ body: '', contentType: 'text/css' }));
+    p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errs.push(m.text()); });
+    await p.goto(url, { waitUntil: 'networkidle' }); await p.waitForTimeout(1500);
+    return p;
+  }
+  const shot = async (p, n) => (await p.$('#mapfig')).screenshot({ path: dir + '/' + n + '.png' });
+  let p = await page(1300, 1000);
+  await p.screenshot({ path: dir + '/d_top.png' });
+  await p.evaluate(() => document.getElementById('mapfig').scrollIntoView()); await p.waitForTimeout(400);
+  await shot(p, 'd_jones');
+  await p.evaluate(() => pickSurname('Haigh', false)); await p.waitForTimeout(800); await shot(p, 'd_haigh');
+  await p.evaluate(() => pickSurname('Hotham', false)); await p.waitForTimeout(800); await shot(p, 'd_hotham');
+  await p.click('#showBtns .btn[data-s="all"]'); await p.waitForTimeout(800); await shot(p, 'd_all');
+  await p.click('#showBtns .btn[data-s="sig"]'); await p.waitForTimeout(800); await p.evaluate(() => lmap.fitBounds([[49.9, -7.6], [60.9, 1.8]])); await p.waitForTimeout(600); await shot(p, 'd_sig');
+  await p.evaluate(() => { const i = document.getElementById('q'); i.value = 'Truro'; i.dispatchEvent(new Event('input')); }); await p.waitForTimeout(400);
+  await p.evaluate(() => document.getElementById('q').focus()); await p.keyboard.press('Enter'); await p.waitForTimeout(1500); await shot(p, 'd_town');
+  await p.evaluate(() => { setShow('name'); pickSurname('Davies', false); S.era = '3'; setPressed('eraBtns', 'e', '3'); redrawData(); lmap.setView([51.6, -3.4], 9.5); }); await p.waitForTimeout(900);
+  await p.mouse.click(400, 500); await shot(p, 'd_zoom');
+  const before = await p.evaluate(() => [document.querySelectorAll('.mfs-btn').length, lmap.getSize().x, lmap.getSize().y]);
+  await p.click('#lmap .mfs-btn'); await p.waitForTimeout(900);
+  const during = await p.evaluate(() => [lmap.getSize().x, lmap.getSize().y, !!document.fullscreenElement, document.getElementById('lmap').classList.contains('mfs-fake')]);
+  await p.screenshot({ path: dir + '/d_full.png' });
+  await p.click('#lmap .mfs-btn'); await p.waitForTimeout(900);
+  const after = await p.evaluate(() => [lmap.getSize().x, lmap.getSize().y, !!document.fullscreenElement]);
+  console.log('fullscreen desktop', JSON.stringify({ before, during, after }));
+  for (const id of ['regChart', 'scatChart', 'welshChart', 'nrsChart']) await (await p.$('#' + id)).screenshot({ path: dir + '/c_' + id + '.png' });
+  await p.close();
+  p = await page(390, 844);
+  await p.screenshot({ path: dir + '/m_top.png' });
+  await p.evaluate(() => document.getElementById('mapfig').scrollIntoView()); await p.waitForTimeout(400);
+  await p.screenshot({ path: dir + '/m_map.png' });
+  await p.evaluate(() => window.scrollTo(0, document.querySelector('#welshCards').getBoundingClientRect().top + scrollY - 100)); await p.waitForTimeout(300);
+  await p.click('#welshCards .card'); await p.waitForTimeout(1500);
+  await p.screenshot({ path: dir + '/m_card.png' });
+  await p.click('#lmap .mfs-btn'); await p.waitForTimeout(900);
+  console.log('fullscreen phone', JSON.stringify(await p.evaluate(() => [lmap.getSize().x, lmap.getSize().y])));
+  await p.screenshot({ path: dir + '/m_full.png' });
+  await p.click('#lmap .mfs-btn'); await p.waitForTimeout(900);
+  console.log('after phone', JSON.stringify(await p.evaluate(() => [lmap.getSize().x, lmap.getSize().y])));
+  await p.click('.lyrBtn'); await p.waitForTimeout(300); await p.screenshot({ path: dir + '/m_layers.png' });
+  const sw = await p.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
+  await p.evaluate(() => window.scrollBy(0, 560)); await p.waitForTimeout(300); await p.screenshot({ path: dir + '/m_info.png' });
+  console.log('scrollWidth', sw);
+  await p.close();
+  console.log('errors', JSON.stringify(errs));
+  await b.close();
+})();
