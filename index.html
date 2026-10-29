@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Has Your Surname Left Home?</title>
+<meta name="description" content="Where 133,761 notable people in Wikidata were born in Great Britain, by surname: born 1800 to 1899 against born 1950 or later. Welsh patronymics, Cornish Tre, Pol and Pen, surnames that are place names, and Hotham.">
+<meta property="og:title" content="Has your surname left home?">
+<meta property="og:description" content="Where notable people with each surname were born in Great Britain, in the 1800s and since 1950. Search your surname. Notable people only, with the biases that brings.">
+<meta property="og:image" content="https://maps.tristanhotham.com/surname-birthplaces/header.png">
+<meta property="og:url" content="https://maps.tristanhotham.com/surname-birthplaces/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+/* Register paper and ink: blue for the 1800s, terracotta for births since 1950. */
+:root{
+  --bg:#F6F2EA; --panel:#ECE6D9; --fg:#1C1B19; --muted:#5F5A52; --rule:#DCD4C4; --card:#FDFBF6; --border:#C9BFAC;
+  --e0:#8A6A3F; --e1:#2C5A8C; --e2:#5E8A3A; --e3:#C4513A; --acc:#C4513A; --sea:#E6EAE8; --land:#F1ECE1; --ns:#1C1B19;
+  --display:"Fraunces",Georgia,"Times New Roman",serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#17171A; --panel:#222127; --fg:#EEEBE5; --muted:#A7A29A; --rule:#35333B; --card:#1E1D22; --border:#4B4851;
+  --e0:#C9A36C; --e1:#6F9FD8; --e2:#93C16B; --e3:#EE8466; --acc:#EE8466; --sea:#1A1D21; --land:#27262B; --ns:#EEEBE5; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17171A; --panel:#222127; --fg:#EEEBE5; --muted:#A7A29A; --rule:#35333B; --card:#1E1D22; --border:#4B4851;
+  --e0:#C9A36C; --e1:#6F9FD8; --e2:#93C16B; --e3:#EE8466; --acc:#EE8466; --sea:#1A1D21; --land:#27262B; --ns:#EEEBE5; color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 18px/1.62 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow-x:hidden}
+.wrap{max-width:680px;margin:0 auto;padding-block:28px 64px}
+.wrap .bleed{width:min(1120px,calc(100vw - 32px));margin-left:calc((100% - min(1120px,100vw - 32px))/2);margin-right:0}
+a{color:inherit;text-decoration-color:var(--acc);text-underline-offset:3px}
+.kicker{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.kicker b{background:var(--fg);color:var(--bg);padding:5px 8px;font-weight:500}
+header.hero{border-bottom:6px double var(--fg);padding-bottom:22px;margin-top:18px}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 14px}
+.tag{font:800 clamp(20px,5vw,34px)/1 var(--display);padding:8px 12px 6px;border-radius:3px;color:#fff;letter-spacing:-.01em}
+.tag small{display:block;font:500 10.5px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;opacity:.92;margin-top:4px}
+.t1{background:var(--e1)}.t3{background:var(--e3)}
+h1{font:900 clamp(40px,9.5vw,82px)/.95 var(--display);letter-spacing:-.02em;margin:6px 0 0;text-wrap:balance}
+.dek{font-size:21px;line-height:1.42;margin:14px 0 0;max-width:54ch}
+.byline{font:400 13px/1.4 var(--mono);color:var(--muted);margin-top:14px}
+h2{font:800 34px/1.04 var(--display);letter-spacing:-.01em;margin:52px 0 10px;text-wrap:balance}
+h2 .n{font:500 13px/1 var(--mono);color:var(--acc);display:block;letter-spacing:.1em;margin-bottom:10px}
+h3{font:600 20px/1.25 var(--display);margin:28px 0 6px}
+p{margin:0 0 16px}
+.lede::first-letter{font:900 72px/.8 var(--display);float:left;margin:6px 10px 0 0;color:var(--e1)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin:26px 0 8px}
+.stats div{background:var(--card);padding:14px 12px}
+.stats b{display:block;font:900 clamp(26px,5.6vw,38px)/1 var(--display)}
+.stats span{font:400 12px/1.35 var(--mono);color:var(--muted);display:block;margin-top:6px}
+@media (max-width:600px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.figure{margin:26px 0 30px}
+.fig-h{font:600 19px/1.25 var(--display);margin:0 0 4px}
+.fig-sub{font:400 13px/1.45 var(--mono);color:var(--muted);margin:0 0 12px}
+.src{font:400 12px/1.45 var(--mono);color:var(--muted);margin-top:10px}
+.chart{width:100%;position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{font-family:var(--mono);fill:var(--fg)}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 8px}
+.controls label.l{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:2px;white-space:nowrap}
+.btn{font:500 12px/1 var(--mono);background:var(--card);color:var(--fg);border:1px solid var(--border);border-radius:3px;padding:8px 10px;cursor:pointer;min-height:36px;white-space:nowrap}
+.btn[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:3px;overflow:hidden;max-width:100%;flex:0 0 auto}
+.seg .btn{border:0;border-radius:0;border-right:1px solid var(--border)}
+.seg .btn:last-child{border-right:0}
+.searchbox{position:relative;flex:1 1 220px;min-width:0}
+input[type=search]{font:400 15px/1 var(--mono);background:var(--card);color:var(--fg);border:1px solid var(--border);border-radius:3px;padding:9px 11px;min-height:38px;width:100%}
+.suggest{position:absolute;left:0;right:0;top:100%;margin:2px 0 0;padding:0;list-style:none;background:var(--card);border:1px solid var(--border);z-index:1001;font:400 13px/1.3 var(--mono);display:none;max-height:300px;overflow:auto}
+.suggest li{padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--rule)}
+.suggest li span{color:var(--muted)}
+.suggest li[aria-selected="true"],.suggest li:hover{background:var(--panel)}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+.quick .btn{min-height:32px;padding:6px 9px}
+@media (max-width:700px){
+  .controls.scroll,.quick{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:thin}
+  .controls.scroll .seg,.quick .btn{flex:0 0 auto}
+}
+.mapgrid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+@media (max-width:900px){.mapgrid{grid-template-columns:1fr}}
+#lmap{height:760px;border:1px solid var(--border);background:var(--sea);border-radius:2px}
+@media (max-width:900px){#lmap{height:600px}}
+@media (max-width:600px){#lmap{height:min(60vh,480px)}}
+.leaflet-container{font:400 12px/1.4 var(--mono);background:var(--sea)}
+.leaflet-bar a,.leaflet-bar a:hover{background:var(--card);color:var(--fg);border-bottom-color:var(--border)}
+@media (max-width:600px){.leaflet-control-attribution{font-size:10px;line-height:1.25}}
+.leaflet-control-attribution{background:color-mix(in srgb,var(--card) 85%,transparent)!important;color:var(--muted)}
+.leaflet-control-attribution a{color:var(--fg)}
+.city{font:500 11px/1 var(--mono);color:var(--fg);white-space:nowrap;text-shadow:0 0 3px var(--bg),0 0 3px var(--bg),0 0 2px var(--bg);pointer-events:none}
+.city.r1{font-size:10px;font-weight:400}
+.city i{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--fg);margin-right:4px;vertical-align:1px}
+.city.r1 i{width:4px;height:4px}
+.sig{font:400 11px/1.25 var(--mono);color:var(--fg);background:color-mix(in srgb,var(--card) 88%,transparent);border:1px solid var(--border);border-left:4px solid var(--e1);padding:4px 6px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.sig b{display:block;font:600 10px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.sig a{cursor:pointer;text-decoration:underline;text-decoration-color:var(--border)}
+.nsk{font:600 12px/1 var(--mono);color:var(--fg);white-space:nowrap;text-shadow:0 0 3px var(--bg),0 0 3px var(--bg)}
+.nsk i{display:inline-block;width:11px;height:11px;transform:rotate(45deg);background:var(--bg);border:2.5px solid var(--ns);margin-right:6px;vertical-align:-1px}
+.lyrBtn{background:var(--card);color:var(--fg);border:1px solid var(--border);border-radius:3px;font:600 12px/1 var(--mono);padding:8px 10px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.lyrBtn[aria-expanded="true"]{background:var(--fg);color:var(--bg)}
+.lyrPanel{background:var(--card);color:var(--fg);border:1px solid var(--border);border-radius:3px;padding:10px 12px 8px;margin-top:6px;width:236px;box-shadow:0 2px 10px rgba(0,0,0,.15);font:400 12px/1.3 var(--mono)}
+.lyrPanel .row{display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:center;margin:0 0 9px}
+.lyrPanel label{display:flex;gap:6px;align-items:center;cursor:pointer;font-weight:600}
+.lyrPanel input[type=range]{width:100%;accent-color:var(--fg)}
+.lyrPanel select{font:400 12px var(--mono);background:var(--bg);color:var(--fg);border:1px solid var(--border);border-radius:2px;padding:2px 4px;width:100%;min-height:0}
+.lyrPanel .sub{grid-column:1/-1;display:flex;gap:6px;align-items:center;color:var(--muted);font-size:11px}
+.lyrPanel .sub span{flex:0 0 52px}
+.lyrPanel .reset{font:400 11px var(--mono);color:var(--muted);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
+.pin{width:18px;height:18px;border:3px solid var(--fg);border-radius:50%;background:transparent;box-shadow:0 0 0 2px var(--bg)}
+.side{background:var(--card);border:1px solid var(--border);padding:14px 14px 10px}
+.side h4{font:500 11px/1.2 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+#legend{font:400 12px/1.35 var(--mono)}
+.lg{display:flex;flex-wrap:wrap;gap:4px 12px;margin:4px 0}
+.lg span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;flex:0 0 auto}
+#info{font:400 13px/1.45 var(--mono);border-top:1px solid var(--rule);padding-top:10px;margin-top:10px;min-height:80px}
+#info b{font-weight:600}
+#info .big{font:800 26px/1.1 var(--display);margin:0 0 2px}
+#info table{width:100%;border-collapse:collapse;margin:6px 0}
+#info td{padding:3px 4px 3px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+#info td.num{text-align:right;white-space:nowrap}
+#info .hbar{display:inline-block;height:8px;vertical-align:1px}
+.muted{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:20px 0}
+@media (max-width:700px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.cards{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-top:8px solid var(--acc);padding:10px 12px;font:400 12.5px/1.45 var(--mono);cursor:pointer;text-align:left;color:var(--fg)}
+.card b{font:700 21px/1.1 var(--display);display:block;margin-bottom:2px}
+.card .big{font:900 26px/1.05 var(--display);margin:4px 0 2px}
+.card:hover{background:var(--panel)}
+.pull{font:600 26px/1.25 var(--display);border-left:6px solid var(--e3);padding:4px 0 4px 18px;margin:30px 0}
+.note{background:var(--panel);border:1px solid var(--rule);padding:14px 16px;font-size:16px;margin:22px 0}
+.note h3{margin-top:0}
+.warn{border-left:6px solid var(--e3)}
+table.t{width:100%;border-collapse:collapse;font:400 13px/1.35 var(--mono)}
+table.t th{text-align:left;font-weight:500;color:var(--muted);border-bottom:2px solid var(--fg);padding:6px 8px 6px 0}
+table.t td{border-bottom:1px solid var(--rule);padding:7px 8px 7px 0;vertical-align:top}
+table.t td.num,table.t th.num{text-align:right;white-space:nowrap}
+table.t a{cursor:pointer}
+.tablewrap{overflow-x:auto}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+.cta a{font:500 13px/1 var(--mono);text-decoration:none;border:1px solid var(--fg);padding:11px 14px;border-radius:3px}
+.cta a.p{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+footer{border-top:6px double var(--fg);margin-top:56px;padding-top:16px;font:400 13px/1.55 var(--mono);color:var(--muted)}
+footer p{margin:0 0 10px}
+.theme{position:fixed;right:12px;bottom:12px;z-index:1002}
+.loading{font:400 12px/1.4 var(--mono);color:var(--muted)}
+.hot{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:18px 0}
+@media (max-width:520px){.hot{grid-template-columns:1fr}}
+.hot div{background:var(--card);border:1px solid var(--border);padding:12px 14px;font:400 13px/1.5 var(--mono)}
+.hot b{font:800 22px/1.1 var(--display);display:block;margin-bottom:4px}
+@media print{.theme,.controls{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="kicker"><b>Data study</b><span>Surnames</span><span>Great Britain, 2026</span></div>
+<header class="hero">
+  <div class="tags" aria-hidden="true"><span class="tag t1">1800s<small>born 1800 to 1899</small></span><span class="tag t3">since 1950<small>born 1950 or later</small></span></div>
+  <h1>Has your surname left home?</h1>
+  <p class="dek">Where notable people with each surname were born in Great Britain: 39,206 born in the 1800s against 48,944 born since 1950, from Wikidata. Search your surname and watch it spread.</p>
+</header>
+<div class="byline">Dr Tristan Hotham, Independent researcher · 2026 · Data: Wikidata (CC0); OS Open Names; National Records of Scotland</div>
+
+<div class="stats">
+  <div><b>133,761</b><span>notable people born in Great Britain since 1700, with a surname and a birthplace</span></div>
+  <div><b style="color:var(--e3)">48%</b><span>fall in how regional a typical common surname is, 1800s to since 1950</span></div>
+  <div><b style="color:var(--e1)">65%</b><span>of 1800s notables called Jones, Davies, Evans and other Welsh patronymics were born in Wales; since 1950, 35%</span></div>
+  <div><b>22%</b><span>of those born since 1950 are women; 14% in the 1800s. This is a list of the notable, not of everyone</span></div>
+</div>
+
+<div class="note warn"><b>Read this first: these are notable people, not everyone.</b> There is no open dataset of surnames by place for Britain. The 1881 census with names sits behind a special licence, and modern name registers are not open. So this study uses the open alternative: people famous enough to have a Wikidata entry with a surname and a birthplace. That sample leans hard towards men (86% of those born in the 1800s), towards London (24% of 1800s births, about one in four), and towards elites: aristocratic families, MPs, officers, clergy, athletes and artists. It shows where notable bearers of a name were born, not where most bearers lived. Treat every map here as a portrait of the well-recorded.</div>
+
+<p class="lede">A surname is a small piece of geography. Many British surnames were fixed in the Middle Ages and stayed close to where they began for centuries: Joneses in Wales, Tre- names in Cornwall, a family named after its village living a few miles from it. Railways, cities and two world wars shuffled the deck. How much? Without open census data, I cannot count everyone, but I can follow a well-documented subset: the people Wikidata records.</p>
+<p>I took every person in Wikidata with a family name, a birth year from 1700 and a birthplace in Great Britain: 133,761 people with 22,041 different surnames, born in 10,260 places. Then I compared where each surname's bearers were born in the 1800s with where they were born from 1950 on. The map lets you search any surname with at least two notable births.</p>
+
+<h2><span class="n">01 · The map</span>Where was your surname born?</h2>
+<div class="figure bleed" id="mapfig">
+  <div class="controls">
+    <div class="searchbox"><input type="search" id="q" placeholder="A surname, or a town" aria-label="Look up a surname or a town" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sug"><ul class="suggest" id="sug" role="listbox"></ul></div>
+    <span class="loading" id="msg">Loading the map data...</span>
+  </div>
+  <div class="quick" id="quick" aria-label="Example surnames"></div>
+  <div class="controls scroll">
+    <label class="l">Born</label>
+    <div class="seg" role="group" aria-label="Which births" id="eraBtns"><button class="btn" data-e="ab" aria-pressed="true">1800s vs since 1950</button><button class="btn" data-e="0" aria-pressed="false">1700s</button><button class="btn" data-e="1" aria-pressed="false">1800s</button><button class="btn" data-e="2" aria-pressed="false">1900 to 1949</button><button class="btn" data-e="3" aria-pressed="false">Since 1950</button></div>
+    <label class="l">Show</label>
+    <div class="seg" role="group" aria-label="What the map shows" id="showBtns"><button class="btn" data-s="name" aria-pressed="true">This surname</button><button class="btn" data-s="all" aria-pressed="false">All notable births</button><button class="btn" data-s="sig" aria-pressed="false">Signature surnames</button></div>
+  </div>
+  <div class="mapgrid">
+    <div id="lmap" role="region" aria-label="Map of notable births by surname across Great Britain"></div>
+    <div class="side">
+      <h4 id="keyTitle">Key</h4>
+      <div id="legend"></div>
+      <div id="info">Search a surname, or tap one of the examples above.</div>
+    </div>
+  </div>
+  <div class="src">Circles: notable births, sized by number. Zoomed out, births are grouped into squares of 0.25 by 0.4 degrees (about 28 km); zoom in to see each birthplace. Diamonds: places in OS Open Names with exactly the surname's spelling (shown when there are at most three). Surnames with fewer than two notable births in Great Britain are not shown.</div>
+</div>
+
+<h2><span class="n">02 · Who is in the data</span>A portrait of the well-recorded</h2>
+<p>Wikidata is built by volunteers from encyclopaedias, sports databases, parliamentary records, peerages and museum catalogues. Who gets an entry follows who was recorded. Of the 133,761 people here, 7,939 were born in the 1700s, 39,206 in the 1800s, 37,672 between 1900 and 1949 and 48,944 from 1950 on. Most are men: women are 14% of those born in the 1800s and 22% of those born since 1950.</p>
+<div class="figure">
+  <div class="fig-h">Where notable people were born, by era</div>
+  <div class="fig-sub">Share of each era's notable births in each region or nation of Great Britain.</div>
+  <div class="chart" id="regChart"></div>
+</div>
+<p>London is the giant: 24% of notable people born in the 1800s were born there, and 21% of those born since 1950. Scotland's share falls from 17% to 12%. These are shares of the notable, so a surname that "moves to London" on the map may only be following where notable people tended to be born. Every comparison below allows for that: a surname counts as regional only when its births cluster more than notable births in general.</p>
+
+<h2><span class="n">03 · Leaving home</span>Surnames got less regional</h2>
+<p>To measure how regional a surname is, I asked what share of its notable births would have to move region for its spread to match all notable births in the same era (a dissimilarity index). Small samples look lumpy by chance, so I compared each surname with random draws of the same size from all births, used the same sample size in both eras, and kept only the 349 surnames with at least 15 notable births in both the 1800s and since 1950.</p>
+<p class="pull">The typical common surname was 48% less regional for people born since 1950 than for those born in the 1800s.</p>
+<p>For the median surname, the share of births beyond what chance would give fell from 13.7 percentage points to 7.1. 79% of the 349 surnames became less regional. The region where a surname was most over-represented stayed the same for only 42% of them, and the median surname's centre of gravity moved 46 km, against 11 km for all notable births together.</p>
+<div class="figure">
+  <div class="fig-h">How regional each surname was, then and now</div>
+  <div class="fig-sub">Each dot is a surname with at least 15 notable births in both eras: its regional clustering beyond chance, in percentage points, for births in the 1800s (across) and since 1950 (up). Below the diagonal: less regional now. Tap a dot to map it.</div>
+  <div class="chart" id="scatChart"></div>
+</div>
+<p>The most regional names in the 1800s were Welsh and Scottish: Rees, Davies, Owen and Jones in Wales; McKenzie, Reid, McLean and Cameron in Scotland. Most stayed regional but much less so. A few held on or grew: Paterson, Thomson and Robertson in Scotland, Robson in the North East. Names of England's industrial north, such as Parkinson, also stayed put more than most.</p>
+<div class="figure">
+  <div class="fig-h">Signature surnames of each region</div>
+  <div class="fig-sub">The surnames most over-represented among each region's notable births (at least six births in the region and eight in Great Britain). Many are single notable families rather than a local name. Tap a name to map it.</div>
+  <div class="tablewrap"><table class="t" id="sigTable"></table></div>
+</div>
+
+<h2><span class="n">04 · Wales</span>Jones, Davies and the patronymics</h2>
+<p>Most Welsh surnames come from patronymics: Evan ap Thomas became Evan Thomas, and the "son of" names with an added s (Jones, Davies, Roberts, Edwards) or a fused ap (Powell from ap Hywel, Price from ap Rhys, Pugh, Pritchard, Bowen) became some of the commonest names in Britain. I took the 14 patronymic surnames named in Wikipedia's article on Welsh surnames.</p>
+<div class="figure">
+  <div class="fig-h">Notable people with Welsh patronymic surnames born in Wales</div>
+  <div class="fig-sub">Share of notable people with the 14 surnames who were born in Wales, by era, against the share of all notable births in Wales.</div>
+  <div class="chart" id="welshChart"></div>
+</div>
+<p>In the 1800s, 65% of notable people with these names were born in Wales, against 8% of all notable people. For those born since 1950 the figure is 35%, against 6%. Still five or six times the national rate, but most notable Joneses, Davieses and Evanses are now born in England, led by London (329 since 1950) and the North West (314). Jones alone has 1,768 notable births in the data, more than any other surname.</p>
+<div class="cards" id="welshCards"></div>
+
+<h2><span class="n">05 · Cornwall</span>By Tre, Pol and Pen</h2>
+<p>"By Tre, Pol and Pen shall ye know all Cornishmen", runs the rhyme recorded by Richard Carew in 1602: tre a homestead, pol a pool, pen a headland. Do notable bearers of Tre-, Pol- and Pen- surnames come from Cornwall? I took every surname in the data that starts with those letters (76 Tre-, 31 Pol- and 48 Pen- names). That catches false friends (Trevor is Welsh, Pennington is a Lancashire place name, Penn and Penny are English), so this is a generous test.</p>
+<div class="figure">
+  <div class="fig-h">Tre-, Pol- and Pen- surnames born in Cornwall</div>
+  <div class="fig-sub">Share of notable people with these surnames born in Cornwall, by era, against the share of all notable births in Cornwall.</div>
+  <div class="chart" id="cornChart"></div>
+</div>
+<p>Cornwall is small in this data: only 826 notable births in all, under 1% in every era. Against that, 7.4% of 1800s notables with Tre-, Pol- or Pen- surnames were born in Cornwall, about 9 times the rate for everyone, and 2.0% of those born since 1950. The rhyme points the right way, but most notable Trevelyans, Trefusises and Penroses were born outside the county, often into landed or naval families with homes elsewhere.</p>
+
+<h2><span class="n">06 · Names that are places</span>Living near your namesake</h2>
+<p>Many English surnames began as a place: someone who came from Haigh, Heywood or Warburton. I matched every surname to the cities, towns and villages in OS Open Names with exactly the same spelling, keeping names with at most three namesakes so that the place is identifiable. That gives 1,410 surnames. A spelling match is not proof of origin (Wilson, Green and Moore are also village names), so this is a test of tendency, not of any single name.</p>
+<div class="figure">
+  <div class="fig-h">Born within 25 km of a place with the same name</div>
+  <div class="fig-sub">Notable people with a surname that is also a British place name: share born within 25 km of that place, against the share expected if they were born where notable people in general were.</div>
+  <div class="chart" id="pnChart"></div>
+</div>
+<p>In the 1800s, 4.5% of notable people with a place-name surname were born within 25 km of a place of that name, 2.9 times what chance would give. For those born since 1950 it is 3.9%, 2.0 times. The pull of the namesake has weakened but not gone. The clearest homing names are northern: of 7 notable Haighs born in the 1800s, 4 were born within 25 km of the village of Haigh near Barnsley; of 16 Leeses, 6 near Lees by Oldham or Lees in Derbyshire. Since 1950 none of the Haighs and none of the Leeses in the data were.</p>
+
+<h2><span class="n">07 · My own name</span>Hotham: a village, and two births</h2>
+<p>My surname is a good warning about this data. Hotham is a village in the East Riding of Yorkshire, population 233 at the 2011 census. Its Wikipedia article records that it was once the land of Sir John Hotham, 1st Baronet, Governor of Hull, and that the Hotham family estate is now at nearby South Dalton. A surname that matches a village a few miles from the family seat is the classic shape of a place-name surname, though I have not traced its origin here. Wikipedia's page for the name lists 14 people called Hotham. But only 2 notable Hothams in Wikidata have both a family name and a birthplace in Great Britain from 1700 on. Others were born abroad or before 1700, or their entries lack a family name or a birthplace.</p>
+<div class="hot">
+  <div><b>Hotham village</b>East Riding of Yorkshire, between York and Hull. The only place of that name in OS Open Names.</div>
+  <div><b>2 notable births</b>Born 1806 near Framlingham, Suffolk (217 km from the village), and 1843 in York (34 km away). None since 1950.</div>
+</div>
+<p>Two points cannot make a pattern. 67% of all surnames in the data have two notable births or fewer, so most people searching the map will meet the same thinness for their own name. That is the honest limit of an open, notable-only source: it is rich for Jones, Smith and Campbell and thin for most names. <a href="#" id="hothamLink">Show Hotham on the map</a>.</p>
+
+<h2><span class="n">08 · A check</span>Scotland's registers against Wikidata</h2>
+<p>One way to see how far notable people mirror everyone is to compare them with real counts. National Records of Scotland publishes the surnames that appear most often in Scotland's birth, marriage and death registers each year, under the Open Government Licence. For the top 100 surnames of 2025, I compared the number of register entries with the number of notable people with that surname born in Scotland since 1950.</p>
+<div class="figure">
+  <div class="fig-h">Register entries in 2025 against notable births since 1950</div>
+  <div class="fig-sub">Scotland's 100 commonest surnames in the 2025 registers (across, log scale) and notable people with each surname born in Scotland since 1950 (up). Names are matched ignoring capitals (Mcdonald and McDonald).</div>
+  <div class="chart" id="nrsChart"></div>
+</div>
+<p>The ranks agree well: a Spearman correlation of 0.85 (0.77 for notables born in the 1800s). Smith leads both lists. So for common names, notable people track the population better than you might fear. The differences are telling: some names are over-represented among the notable (McKenzie, Kerr, Gibson) and some under-represented (Johnstone has none, Dickson, Green and Hill few), and spelling matters, because Wikidata and the registers do not always agree on it.</p>
+
+<h2><span class="n">09 · Method</span>How I did this, and what to watch for</h2>
+<p><b>People.</b> Wikidata, queried on 29 October 2026 through the QLever SPARQL endpoint: every human with a family name (property P734), a place of birth (P19) with coordinates, and a date of birth in 1700 or later, where the birthplace's country is the United Kingdom or one of its predecessor states. That gave 141,273 people. A birthplace counts as in Great Britain if an OS Open Names settlement lies within 10 km of it; this drops Northern Ireland, the Isle of Man and the Channel Islands, which OS Open Names does not cover, and leaves 133,761 people. Each birthplace takes its region and county from the nearest OS Open Names settlement. Surnames are Wikidata's English labels of the family-name items, so spellings are kept apart (Thomson and Thompson, Mcdonald and McDonald).</p>
+<p><b>Measures.</b> Regional clustering is the dissimilarity index between a surname's births across the 11 regions and nations and all notable births in the same era, averaged over 200 random subsamples of the same size in both eras (at most 60), minus the average index for random samples of all notable births of that size. The centre of gravity is the mean position of births. Signature surnames use the location quotient: a surname's share of a region's births divided by its share of all births. Namesake distances are to the nearest OS Open Names city, town or village with exactly the surname's spelling, compared with a random sample of 8,000 notable births per era.</p>
+<p><b>Limits.</b> This is not a census. Notability is skewed by sex, class, occupation and place, and by what volunteers have entered: Wikidata coverage of sportspeople and politicians born since 1950 is far better than of farmers born in 1820. A birthplace is often a town or city rather than a parish, and "London" is one point for millions of births. People with two family names count under each. Spelling variants are separate surnames. The 1881 census, which would answer the original question for everyone, is held by the UK Data Service with surnames only under a special licence, and is not used here.</p>
+<div class="note"><h3>Data and code</h3><p>The counts of notable births by surname, era and region, the regional measures for each surname, the place-name and Scottish comparisons and all code are in the <a href="https://github.com/Tristan-Hotham/surname-birthplaces">GitHub repository</a> and archived with the paper at <a href="https://doi.org/10.5281/zenodo.23761427">doi.org/10.5281/zenodo.23761427</a>. Only aggregate counts are published, never lists of people.</p></div>
+<div class="cta"><a class="p" href="https://doi.org/10.5281/zenodo.23761427">Read the paper</a><a href="https://github.com/Tristan-Hotham/surname-birthplaces">Data and code</a><a href="https://blog.tristanhotham.com/2026/10/29/surname-birthplaces/">Blog post</a><a href="https://blog.tristanhotham.com/">More data studies</a></div>
+<p>Related: <a href="https://maps.tristanhotham.com/place-name-endings/">What is your town's name made of?</a> on the old words inside place names, and <a href="https://maps.tristanhotham.com/street-names/">High Street or Main Street?</a> on street names.</p>
+
+<footer>
+  <p><b>Sources.</b> Wikidata (CC0 1.0), retrieved 29 October 2026 through the QLever SPARQL endpoint (University of Freiburg). OS Open Names, Ordnance Survey: contains OS data © Crown copyright and database right 2026, Open Government Licence v3.0. National Records of Scotland, Most Common Surnames 2025, © Crown copyright, Open Government Licence v3.0. Local authority boundaries for the outline: Office for National Statistics, Open Government Licence v3.0. Context from English Wikipedia articles (Welsh surnames; Tre, Pol and Pen; Hotham; Hotham, East Riding of Yorkshire), CC BY-SA 4.0. Map tiles © Esri.</p>
+  <p><b>Licences.</b> Code MIT. Data and text CC BY 4.0 (keep the source credits above when reusing).</p>
+  <p><b>Cite.</b> Hotham, T. (2026) Has your surname left home? Birthplaces of notable people by surname in Great Britain, 1800 to 1899 and 1950 onwards. Zenodo. <a href="https://doi.org/10.5281/zenodo.23761427">https://doi.org/10.5281/zenodo.23761427</a></p>
+  <p>I wrote the text, with drafting and editing assistance from Claude (Anthropic), which also helped prepare the analysis code. I reviewed and checked all text and results.</p>
+  <p>Dr Tristan Hotham, Independent researcher, ORCID <a href="https://orcid.org/0000-0003-4931-9349">0000-0003-4931-9349</a> · <a href="https://blog.tristanhotham.com/">blog.tristanhotham.com</a> · <a href="https://maps.tristanhotham.com/surname-birthplaces/">maps.tristanhotham.com/surname-birthplaces</a></p>
+</footer>
+</div>
+<button class="btn theme" id="themeBtn" aria-label="Switch light or dark theme">Theme</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const R = {"regions":["Scotland","North East","North West","Yorkshire and the Humber","East Midlands","West Midlands","Eastern","London","South East","South West","Wales"],"ov":[{"Scotland":0.19964731074442624,"North East":0.026829575513288826,"North West":0.05517067640760801,"Yorkshire and the Humber":0.04471595918881471,"East Midlands":0.07217533694419952,"West Midlands":0.04723516815719864,"Eastern":0.05416299282025444,"London":0.23516815719863962,"South East":0.07116765335684595,"South West":0.09119536465549817,"Wales":0.10253180501322584},{"Scotland":0.16602050706524513,"North East":0.03428046727541703,"North West":0.09029230219864307,"Yorkshire and the Humber":0.05420088761924195,"East Midlands":0.06593378564505432,"West Midlands":0.06261796663775952,"Eastern":0.04478906289853594,"London":0.23659643932051216,"South East":0.08552262408814977,"South West":0.07853389787277458,"Wales":0.08121205937866653},{"Scotland":0.12977808451900616,"North East":0.05959333191760459,"North West":0.11371841155234658,"Yorkshire and the Humber":0.07825440645572308,"East Midlands":0.0580802718199193,"West Midlands":0.060389679337438947,"Eastern":0.045205988532597156,"London":0.2377097048205564,"South East":0.08998725844128265,"South West":0.05162985771926099,"Wales":0.07565300488426417},{"Scotland":0.12046420398823145,"North East":0.05651356652500817,"North West":0.12373324615887545,"Yorkshire and the Humber":0.07982592350441321,"East Midlands":0.06948757763975155,"West Midlands":0.06621853546910755,"Eastern":0.061008499509643675,"London":0.21058761033017326,"South East":0.09735616214449166,"South West":0.05485861392611965,"Wales":0.059946060804184374}],"scatter":[["Rees",0.5747,0.3502,40,36],["Davies",0.5253,0.2993,343,313],["Owen",0.5098,0.2782,104,63],["Jones",0.496,0.2375,583,555],["McKenzie",0.484,0.2198,17,45],["Griffiths",0.4707,0.241,57,103],["Reid",0.4632,0.1695,53,93],["McLean",0.4628,0.2439,33,29],["Paterson",0.4451,0.4012,33,34],["Ritchie",0.4417,0.2622,29,31],["Cameron",0.4382,0.1585,47,33],["Evans",0.4373,0.2703,265,259],["Thomson",0.435,0.3866,93,70],["Millar",0.4257,0.1641,15,27],["Williams",0.4212,0.1743,357,409],["Fraser",0.4141,0.2438,65,57],["Davidson",0.4049,0.2032,53,43],["Hughes",0.4038,0.11,170,155],["Pugh",0.3885,0.2332,17,29],["Henderson",0.3833,0.2592,58,58],["McMillan",0.3816,0.1596,15,25],["Thomas",0.3781,0.1792,220,233],["Roberts",0.3779,0.1661,191,179],["Logan",0.3749,0.0837,21,23],["Ferguson",0.3722,0.312,35,51],["MacDonald",0.3686,0.2675,32,55],["McIntyre",0.3667,0.1013,21,21],["Ross",0.3661,0.2293,64,59],["Crawford",0.3637,0.114,36,34],["Robertson",0.3563,0.3447,106,99],["Stewart",0.3537,0.1794,88,106],["Burns",0.35,0.1298,22,55],["Duncan",0.3479,0.1889,58,35],["Parkinson",0.3405,0.2838,15,19],["Holden",0.338,0.0709,23,26],["Dickinson",0.331,0.016,30,30],["Hunter",0.3288,0.0467,58,57],["Turnbull",0.3286,0.0575,19,15],["Stevenson",0.3273,0.1058,48,44],["Price",0.3267,0.151,58,84],["Grant",0.3265,0.0951,50,85],["Parry",0.3261,0.1756,22,28],["Buchanan",0.325,0.1096,38,29],["McDonald",0.3238,0.1431,23,76],["Edwards",0.3237,0.131,138,154],["Macdonald",0.3175,0.351,34,23],["Morgan",0.3172,0.1996,112,133],["Anderson",0.3155,0.1357,136,123],["Murray",0.3155,0.2483,88,114],["Cowan",0.3142,0.1573,15,15],["Allan",0.3085,0.1748,23,20],["Richards",0.3079,0.1541,57,86],["Tait",0.3026,0.2612,21,18],["Campbell",0.302,0.1538,113,138],["Lewis",0.3002,0.1513,147,151],["Rhodes",0.2929,0.0382,25,23],["Barr",0.2918,0.2043,17,16],["Craig",0.2893,0.0636,21,37],["Lloyd",0.2883,0.1454,88,84],["Watkins",0.2821,0.1521,24,24],["Milne",0.2818,0.2578,26,24],["Sutherland",0.2799,0.1728,29,24],["Bowen",0.2794,0.1319,26,24],["Lowe",0.2773,0.0527,26,55],["Mackay",0.2764,0.2612,18,18],["Sinclair",0.2756,0.0674,25,44],["Morrison",0.274,0.1379,31,53],["Bradshaw",0.2717,0.199,24,17],["Ramsay",0.2695,0.1603,35,24],["Blair",0.2681,0.1779,23,15],["Spence",0.2672,0.1517,25,26],["Atkinson",0.2643,0.1789,30,46],["Kerr",0.2596,0.3209,38,52],["Arnold",0.2591,0.1356,30,33],["Reed",0.2535,0.055,22,41],["Park",0.2516,0.1489,15,16],["Aitken",0.2463,0.1481,24,16],["Barlow",0.241,0.1142,24,20],["Weston",0.2379,0.1181,18,15],["Sutton",0.2375,0.1673,19,25],["Wheeler",0.2336,0.009,20,24],["James",0.2312,0.1382,83,150],["Black",0.231,0.0967,35,52],["Ellis",0.2274,0.0523,60,73],["Greenwood",0.2263,0.2008,25,35],["Yates",0.2227,0.0343,22,36],["Benson",0.2222,0.0962,23,20],["Buckley",0.2211,-0.0104,21,25],["Bartlett",0.2197,0.123,17,23],["Briggs",0.2181,0.0635,24,29],["Powell",0.2169,0.0672,41,75],["Webb",0.216,0.0471,47,66],["Cunningham",0.2148,-0.0023,26,38],["Simpson",0.2146,0.0535,79,69],["Francis",0.2127,0.0528,28,45],["Fuller",0.2091,0.1997,23,24],["Field",0.2085,0.2177,24,16],["Phillips",0.2081,0.1007,82,113],["Vaughan",0.2079,0.1605,26,26],["Booth",0.2053,0.1609,40,38],["Wells",0.2038,0.0247,21,46],["Wilkinson",0.203,0.1117,50,61],["Harding",0.2007,0.0614,21,40],["Hicks",0.1994,0.0437,17,24],["Lawson",0.199,-0.0394,31,26],["Fry",0.1977,0.038,19,21],["Gray",0.1943,0.0799,78,90],["Day",0.1941,0.0745,29,47],["Miller",0.1934,0.0528,79,122],["Fleming",0.1934,0.0972,38,30],["Johnston",0.1934,0.1315,45,44],["Kay",0.1933,0.0933,21,41],["Cohen",0.1931,0.1505,28,19],["Gordon",0.1909,0.0346,76,55],["Robson",0.1899,0.2926,26,38],["Morris",0.1885,0.1372,101,120],["Dixon",0.188,0.0628,60,59],["Johnson",0.1873,0.0752,109,205],["Nicholls",0.1868,0.0285,26,33],["Thornton",0.1865,-0.0049,21,17],["Wallace",0.1848,0.1223,33,56],["Hay",0.1841,0.2095,25,21],["Maxwell",0.1812,0.0665,26,20],["Kirk",0.1804,0.2286,18,19],["Burke",0.1803,0.0492,17,38],["Christie",0.1757,0.1711,27,25],["Summers",0.175,-0.0666,16,16],["Hooper",0.1741,0.1185,18,21],["Stuart",0.1731,-0.0282,34,15],["Nash",0.1728,0.0237,21,22],["Hamilton",0.1719,0.1004,85,84],["Seymour",0.1715,0.1584,32,17],["Howell",0.1706,-0.0026,27,25],["Gibson",0.1695,0.1427,52,73],["Brooks",0.1683,0.0741,37,41],["Lane",0.1679,0.013,26,28],["Boyd",0.1673,0.1633,31,28],["Heath",0.1672,0.1371,25,20],["Lindsay",0.1632,0.2551,31,16],["Cooke",0.1628,0.0246,28,44],["Armstrong",0.1627,0.1254,41,56],["Bradley",0.1625,0.037,29,32],["Kennedy",0.162,0.0307,43,73],["Harrison",0.1615,0.0386,81,115],["Parsons",0.161,0.1331,24,29],["Mercer",0.1601,0.1037,18,16],["Fletcher",0.1588,0.1251,47,65],["George",0.1584,0.0036,26,53],["Thompson",0.1555,0.0531,112,157],["Ashton",0.1551,0.1219,22,27],["Paul",0.155,0.1025,21,22],["Graham",0.1545,0.1085,63,75],["Woodward",0.1542,0.0248,19,23],["Bruce",0.1534,0.0488,45,32],["Wilson",0.151,0.0642,243,230],["Brown",0.1503,0.015,214,322],["Page",0.1491,0.0765,33,36],["Nicholson",0.1488,0.0864,38,31],["Gardner",0.1476,0.0997,35,32],["Tucker",0.1469,0.0108,15,20],["Rose",0.1469,0.0509,30,49],["Stone",0.1442,0.0351,19,37],["Myers",0.1432,-0.007,16,16],["Forbes",0.1427,0.157,23,18],["Freeman",0.1418,0.0483,43,35],["Ward",0.1418,0.0144,88,114],["Marsden",0.1405,0.0407,15,15],["Mitchell",0.1401,0.0315,72,88],["Hutchinson",0.14,0.0256,29,27],["Bell",0.1397,0.0447,102,103],["Stephens",0.1393,-0.0201,25,36],["Carter",0.1393,0.0441,55,70],["Hardy",0.1387,-0.0016,48,25],["Whitehead",0.1382,0.0426,25,28],["Hutton",0.1371,-0.0931,24,19],["Jackson",0.1355,0.0621,87,111],["Shaw",0.1329,-0.0104,64,81],["Pearce",0.1324,0.0374,19,42],["Palmer",0.1305,0.0934,58,68],["Adams",0.1302,0.0183,82,85],["Butler",0.1298,0.049,62,52],["Lucas",0.1293,-0.0218,34,19],["Barnes",0.1288,0.0256,47,62],["Todd",0.1287,0.0913,18,24],["Holt",0.1274,0.0872,19,27],["Williamson",0.1269,0.0936,32,46],["Banks",0.1267,0.0831,21,40],["Coleman",0.1265,0.0407,15,41],["Watson",0.1263,0.0551,117,116],["Alexander",0.126,0.0462,54,53],["Hudson",0.1249,0.1177,31,37],["Richardson",0.1247,0.0397,79,78],["Mann",0.1235,-0.0398,24,29],["Talbot",0.1231,-0.023,17,20],["Riley",0.1221,0.0626,16,47],["Scott",0.1199,0.071,146,161],["Collins",0.1199,-0.0273,49,102],["Young",0.1198,0.0775,104,127],["Knight",0.1196,0.0946,52,58],["Clarke",0.1188,0.0661,63,151],["Stevens",0.1179,0.0549,26,38],["Andrews",0.1173,0.0444,35,40],["Dawson",0.1167,0.1517,41,50],["Harper",0.1157,-0.0023,33,34],["Davis",0.115,0.109,71,98],["Bailey",0.113,0.0744,41,89],["Kelly",0.1128,0.0827,28,98],["Osborne",0.1124,0.0284,17,32],["Payne",0.1115,-0.0096,32,43],["Gould",0.1112,-0.0062,29,17],["Burton",0.1106,0.1058,43,46],["Barrett",0.1105,0.0085,27,36],["Newman",0.1101,0.067,22,40],["Gilbert",0.1096,0.044,27,35],["Elliott",0.1089,0.0131,31,48],["Stokes",0.1086,0.0794,17,17],["Watts",0.1082,0.1056,33,38],["Ball",0.1077,0.0739,25,41],["Rogers",0.107,0.085,41,48],["Poole",0.1068,-0.067,19,23],["Foster",0.1059,0.0358,57,74],["Hodgson",0.1052,0.2577,25,34],["Carr",0.1049,-0.0251,33,41],["Abbott",0.1046,0.1252,30,18],["Gregory",0.1035,0.0309,27,36],["Stephenson",0.1028,0.1196,21,23],["Hayes",0.1012,0.0959,16,34],["Blackburn",0.1006,-0.0711,21,17],["Lamb",0.0979,0.0039,18,28],["Barker",0.0978,0.0434,45,60],["Saunders",0.0971,0.0378,30,34],["Bennett",0.0961,0.0365,72,103],["Walters",0.0955,0.0195,18,26],["Baker",0.0947,0.0297,111,94],["Beaumont",0.0946,0.0331,21,24],["Hammond",0.0935,0.1504,25,25],["Hope",0.0925,-0.0082,31,18],["Warner",0.0919,0.0373,17,28],["Hall",0.0911,0.0463,117,123],["Smart",0.0904,-0.0973,18,19],["Ford",0.0897,0.045,36,54],["Robinson",0.0896,0.1102,111,150],["Cole",0.0894,0.0714,31,48],["Cox",0.0892,0.0591,51,78],["Wright",0.0879,0.0485,104,164],["Bates",0.0872,0.0325,25,38],["Douglas",0.087,0.0621,49,36],["Clark",0.0869,0.0677,93,139],["Law",0.0866,-0.0149,15,31],["Holmes",0.085,0.0666,43,63],["Chapman",0.0843,0.0331,48,67],["West",0.0838,0.0739,40,40],["Harris",0.0823,0.0373,105,132],["Sharp",0.0821,0.0915,34,42],["May",0.0819,0.0388,23,38],["Townsend",0.0812,0.0853,23,25],["Austin",0.081,0.1842,32,27],["Goodwin",0.0783,0.0163,17,29],["Fox",0.0781,0.0049,52,74],["Perry",0.0777,0.066,21,45],["Moore",0.0772,0.0475,101,135],["Martin",0.0755,0.0261,81,117],["Howard",0.0748,0.1037,48,57],["Browne",0.0748,0.0172,40,17],["Wood",0.0732,0.0757,124,125],["Hopkins",0.0724,0.1388,26,30],["Bishop",0.0719,0.0432,20,36],["Lawrence",0.0694,0.089,31,49],["Barber",0.069,0.0717,24,25],["Parker",0.0687,0.0374,58,70],["Stanley",0.068,-0.008,34,20],["Mason",0.0669,-0.0227,37,58],["Norman",0.0665,0.078,18,21],["Gill",0.0664,0.0019,28,51],["Allen",0.0659,0.057,91,98],["Kemp",0.0643,0.0313,16,15],["Hewitt",0.0632,0.0509,15,24],["Cooper",0.0625,0.0247,93,105],["Spencer",0.0625,0.021,46,56],["Newton",0.0617,0.0473,30,29],["Turner",0.0606,0.0144,93,101],["Bryant",0.0586,0.1113,15,22],["Holland",0.058,0.0331,33,33],["Hancock",0.0577,0.0007,18,15],["Pearson",0.0558,0.1363,55,60],["Cook",0.0545,0.0404,45,83],["Reynolds",0.0544,0.0613,29,45],["Walker",0.0529,0.0722,139,191],["Barton",0.0528,-0.029,32,23],["King",0.0527,0.053,67,118],["Curtis",0.0526,0.0041,18,32],["Russell",0.051,0.0713,90,81],["Patterson",0.0501,-0.0055,17,24],["Willis",0.049,0.087,25,29],["Mills",0.0476,0.0798,44,58],["Woods",0.047,0.1401,23,41],["Birch",0.0468,0.1411,20,22],["Smith",0.0458,0.0405,476,580],["Green",0.0453,0.0453,93,127],["Fowler",0.0425,-0.0452,47,29],["Cross",0.0424,-0.0156,28,32],["Cotton",0.0424,0.0631,18,16],["Walton",0.0418,0.1501,32,27],["Dunn",0.0407,-0.0115,31,38],["Bird",0.0398,-0.0517,24,28],["Taylor",0.0396,0.054,196,294],["Baxter",0.0346,-0.0172,21,24],["Boyle",0.032,0.2014,18,29],["Hill",0.0312,0.0754,116,105],["Berry",0.0301,0.0514,26,32],["Noble",0.0298,0.0384,17,25],["Herbert",0.0297,0.1571,40,25],["Marshall",0.0296,0.0737,85,67],["Chambers",0.0293,0.091,29,34],["Warren",0.0287,0.0173,24,30],["Barnett",0.0238,0.1456,25,30],["Moss",0.0216,-0.0344,17,27],["Morton",0.0196,0.089,38,35],["Norris",0.0184,0.0627,15,33],["Savage",0.0169,-0.0822,18,19],["White",0.0162,0.0457,106,138],["Hart",0.015,0.019,22,42],["Slater",0.0135,0.1377,16,24],["Marsh",0.013,0.0711,21,32],["Oliver",0.0106,0.039,32,46],["Jordan",0.0083,-0.0056,17,36],["Rice",0.0078,0.0282,17,20],["Forster",0.0074,0.0629,16,17],["Frost",0.0038,0.0547,15,33],["Fisher",0.0027,0.1153,39,47],["Burnett",0.0021,0.063,15,17],["Harvey",0.0005,0.0807,46,59],["Henry",-0.0009,0.0191,20,44],["Higgins",-0.0028,0.1116,21,27],["Dean",-0.0029,0.0236,21,42],["Burgess",-0.0076,0.0725,27,40],["Lee",-0.008,0.0529,36,71],["Dobson",-0.0126,0.1281,24,20],["Blake",-0.0154,0.0256,15,32],["Webster",-0.0177,0.131,33,47],["Archer",-0.0294,0.043,20,25],["Dale",-0.0401,0.0118,15,25],["Matthews",-0.0414,0.1013,32,49],["Kirby",-0.0602,0.0695,16,16],["Potter",-0.082,-0.0416,22,32],["Glover",-0.0835,0.0301,17,31],["Porter",-0.0867,0.0241,23,41],["Wade",-0.095,-0.0599,16,22],["Steele",-0.1015,0.1131,20,30]],"scat_labels":["Rees","Jones","Davies","Paterson","Thomson","McKenzie","Robson","Smith","Campbell","Cameron","Williams"],"signature":{"1800s":{"Scotland":[["Hutchison",14,14,6.0],["Wedderburn",10,10,6.0],["Watt",14,14,6.0],["McEwan",9,9,6.0],["McKenzie",16,17,5.7]],"North East":[["Elliot",6,10,17.5],["Headlam",6,12,14.6],["Liddell",6,12,14.6],["Grey",9,23,11.4],["Robson",9,26,10.1]],"North West":[["Ashworth",7,8,9.7],["Royle",6,8,8.3],["Parkinson",10,15,7.4],["Nuttall",6,9,7.4],["Crompton",6,9,7.4]],"Yorkshire and the Humber":[["Stansfield",12,15,14.8],["Lupton",6,8,13.8],["Firth",7,10,12.9],["Rhodes",9,25,6.6],["Briggs",7,24,5.4]],"East Midlands":[["Hind",7,14,7.6],["Lowe",12,26,7.0],["Riley",6,16,5.7],["Sutton",6,19,4.8],["Townsend",7,23,4.6]],"West Midlands":[["Parkes",9,11,13.1],["Perry",8,21,6.1],["Wheeler",7,20,5.6],["Kirk",6,18,5.3],["Banks",6,21,4.6]],"Eastern":[["Bertram",7,13,12.0],["Rose",6,30,4.5],["Palmer",9,58,3.5],["Cox",7,51,3.1],["Johnson",13,109,2.7]],"London":[["Gordon-Lennox",10,11,3.8],["Rothschild",9,10,3.8],["Barraud",8,9,3.8],["Piesse",7,8,3.7],["Weale",7,8,3.7]],"South East":[["Henty",7,9,9.1],["Wyndham",8,17,5.5],["Davenport",6,16,4.4],["Hoare",6,19,3.7],["Carpenter",9,31,3.4]],"South West":[["Hazeland",11,11,12.7],["Batten",7,10,8.9],["Trefusis",8,13,7.8],["Wills",8,16,6.4],["Carroll",6,12,6.4]],"Wales":[["Rees",34,40,10.5],["John",10,13,9.5],["Hamer",6,8,9.2],["Davies",257,343,9.2],["Griffith",32,43,9.2]]},"since1950":{"Scotland":[["McLaren",14,16,7.3],["McKinnon",7,8,7.3],["Gallacher",14,17,6.8],["Docherty",9,11,6.8],["Hamill",8,10,6.6]],"North East":[["Ridley",7,11,11.3],["Liddle",6,10,10.6],["Robson",18,38,8.4],["Davison",8,17,8.3],["Tait",8,18,7.9]],"North West":[["Morley",9,12,6.1],["Mellor",9,13,5.6],["Ashworth",8,12,5.4],["Nuttall",8,12,5.4],["McLoughlin",6,10,4.8]],"Yorkshire and the Humber":[["Whitaker",9,10,11.3],["Hirst",9,11,10.2],["Dyson",6,12,6.3],["Dobson",8,20,5.0],["Kirk",7,19,4.6]],"East Midlands":[["Spencer-Churchill",6,10,8.6],["Hanson",6,24,3.6],["Herbert",6,25,3.5],["Higgins",6,27,3.2],["Palmer",15,68,3.2]],"West Midlands":[["Brookes",9,13,10.5],["Ali",6,15,6.0],["Birch",7,22,4.8],["Heath",6,20,4.5],["Bradley",9,32,4.2]],"Eastern":[["Barber",6,25,3.9],["Norris",7,33,3.5],["Day",8,47,2.8],["Henry",6,44,2.2],["King",16,118,2.2]],"London":[["Boateng",8,8,4.7],["Merton",9,9,4.7],["Wellesley",7,8,4.2],["Shah",9,11,3.9],["Patel",9,13,3.3]],"South East":[["Bartlett",8,23,3.6],["Fuller",8,24,3.4],["Middleton",9,29,3.2],["Benson",6,20,3.1],["Keen",6,20,3.1]],"South West":[["Way",6,9,12.2],["Bryant",7,22,5.8],["Parsons",6,29,3.8],["Newman",8,40,3.6],["Harding",7,40,3.2]],"Wales":[["Llewellyn",7,13,9.0],["Rees",18,36,8.3],["Evans",118,259,7.6],["Davies",141,313,7.5],["Owen",26,63,6.9]]}},"welsh":[[0.7826961770623743,0.10253180501322584],[0.6464333185644661,0.08121205937866653],[0.486908358509567,0.07565300488426417],[0.3499361430395913,0.059946060804184374]],"welsh_names":[["Jones",583,0.7204116638078902,555,0.3945945945945946],["Williams",357,0.6330532212885154,409,0.30073349633251834],["Davies",343,0.749271137026239,313,0.4504792332268371],["Evans",265,0.6716981132075471,259,0.4555984555984556],["Thomas",220,0.6,233,0.3261802575107296],["Roberts",191,0.5863874345549738,179,0.3016759776536313],["Edwards",138,0.4492753623188406,154,0.22077922077922077],["Price",58,0.41379310344827586,84,0.25],["Powell",41,0.43902439024390244,75,0.18666666666666668],["Bowen",26,0.5,24,0.3333333333333333],["Pugh",17,0.6470588235294118,29,0.27586206896551724],["Pritchard",13,0.23076923076923078,28,0.25],["Pryce",7,0.7142857142857143,11,0.18181818181818182],["Upjohn",2,0.0,0,0.0]],"corn":[[0.18181818181818182,0.012973926187177227],[0.07407407407407407,0.008366066418405347],[0.046511627906976744,0.004698449777022723],[0.02,0.004454069957502452]],"pn":[[0.0536779324055666,0.01126610337972167],[0.04498341625207297,0.01530785447761194],[0.039313149570718485,0.016969832806145505],[0.0388671875,0.019085474609374996]],"nrs":[["Smith",1827,99],["Brown",1248,51],["Wilson",1205,55],["Thomson",1033,46],["Campbell",1027,54],["Stewart",991,45],["Robertson",958,61],["Anderson",942,34],["Taylor",751,20],["Murray",736,50],["Scott",711,33],["Macdonald",700,44],["Reid",685,39],["Clark",653,35],["Walker",611,32],["Mitchell",602,18],["Young",579,30],["Ross",570,28],["Watson",570,28],["Morrison",560,22],["Paterson",526,24],["Graham",508,24],["Miller",503,28],["Fraser",501,30],["Mcdonald",496,32],["Bell",485,12],["Martin",485,18],["Henderson",482,22],["Hamilton",470,27],["Gray",466,27],["Davidson",456,20],["Kelly",454,23],["Kerr",449,33],["Duncan",443,18],["Ferguson",443,30],["Cameron",431,16],["Johnston",428,16],["Hunter",416,11],["Grant",406,27],["Mclean",395,16],["Simpson",390,11],["Jones",382,11],["Allan",372,9],["Mackenzie",372,12],["Macleod",368,19],["Black",356,17],["Wallace",344,19],["Kennedy",343,18],["Mackay",336,17],["Gibson",331,23],["Murphy",330,9],["Wood",329,8],["Russell",328,18],["Wright",320,16],["Hughes",319,13],["Marshall",309,10],["Gordon",307,10],["Milne",305,15],["Burns",299,17],["Stevenson",296,12],["Ritchie",284,15],["Sutherland",276,10],["Craig",274,10],["Sinclair",267,13],["Muir",266,8],["White",266,12],["Jackson",263,12],["Munro",262,9],["Watt",261,11],["Mckay",259,12],["King",253,14],["Williamson",252,9],["Mcmillan",251,13],["Williams",251,6],["Cunningham",248,8],["Johnstone",246,0],["Docherty",243,9],["Crawford",240,13],["Dickson",240,3],["Mcintosh",240,14],["Mckenzie",239,24],["Shaw",232,10],["Hill",225,4],["Thompson",225,6],["Mclaughlin",223,16],["Moore",221,10],["Bruce",220,9],["Millar",220,15],["Fleming",217,9],["Lindsay",216,10],["Hall",213,6],["Mcgregor",213,8],["Cooper",212,6],["Turner",212,5],["Mcintyre",208,9],["Douglas",205,10],["Hay",204,9],["Johnson",204,4],["Green",202,3],["Ward",201,9]],"nrs_labels":["Smith","Brown","Wilson","Campbell","Robertson","Kerr","Johnstone","Mckenzie","Murray","Thomson"],"quick":["Jones","Campbell","Davies","Smith","Trevelyan","Haigh","Robson","Paterson","Hotham"],"default_surname":"Jones","reg":{"Rees":[57.5,35.0,74],"Davies":[52.5,29.9,44],"Owen":[51.0,27.8,83],"Jones":[49.6,23.8,54],"McKenzie":[48.4,22.0,274],"Griffiths":[47.1,24.1,48],"Reid":[46.3,17.0,173],"McLean":[46.3,24.4,183],"Paterson":[44.5,40.1,29],"Ritchie":[44.2,26.2,187],"Cameron":[43.8,15.8,131],"Evans":[43.7,27.0,36],"Thomson":[43.5,38.7,56],"Millar":[42.6,16.4,155],"Williams":[42.1,17.4,61],"Fraser":[41.4,24.4,139],"Davidson":[40.5,20.3,141],"Hughes":[40.4,11.0,48],"Pugh":[38.9,23.3,46],"Henderson":[38.3,25.9,119],"McMillan":[38.2,16.0,151],"Thomas":[37.8,17.9,50],"Roberts":[37.8,16.6,49],"Logan":[37.5,8.4,124],"Ferguson":[37.2,31.2,60],"MacDonald":[36.9,26.8,110],"McIntyre":[36.7,10.1,160],"Ross":[36.6,22.9,98],"Crawford":[36.4,11.4,150],"Robertson":[35.6,34.5,38],"Stewart":[35.4,17.9,103],"Burns":[35.0,13.0,91],"Duncan":[34.8,18.9,72],"Parkinson":[34.1,28.4,30],"Holden":[33.8,7.1,23],"Dickinson":[33.1,1.6,25],"Hunter":[32.9,4.7,166],"Turnbull":[32.9,5.8,147],"Stevenson":[32.7,10.6,182],"Price":[32.7,15.1,27],"Grant":[32.6,9.5,183],"Parry":[32.6,17.6,34],"Buchanan":[32.5,11.0,94],"McDonald":[32.4,14.3,172],"Edwards":[32.4,13.1,40],"Macdonald":[31.8,35.1,129],"Morgan":[31.7,20.0,45],"Anderson":[31.6,13.6,167],"Murray":[31.6,24.8,67],"Cowan":[31.4,15.7,171],"Allan":[30.9,17.5,97],"Richards":[30.8,15.4,52],"Tait":[30.3,26.1,129],"Campbell":[30.2,15.4,92],"Lewis":[30.0,15.1,52],"Rhodes":[29.3,3.8,18],"Barr":[29.2,20.4,72],"Craig":[28.9,6.4,129],"Lloyd":[28.8,14.5,31],"Watkins":[28.2,15.2,35],"Milne":[28.2,25.8,35],"Sutherland":[28.0,17.3,145],"Bowen":[27.9,13.2,62],"Lowe":[27.7,5.3,56],"Mackay":[27.6,26.1,78],"Sinclair":[27.6,6.7,222],"Morrison":[27.4,13.8,116],"Bradshaw":[27.2,19.9,33],"Ramsay":[27.0,16.0,62],"Blair":[26.8,17.8,77],"Spence":[26.7,15.2,221],"Atkinson":[26.4,17.9,18],"Kerr":[26.0,32.1,51],"Arnold":[25.9,13.6,20],"Reed":[25.4,5.5,58],"Park":[25.2,14.9,150],"Aitken":[24.6,14.8,70],"Barlow":[24.1,11.4,23],"Weston":[23.8,11.8,64],"Sutton":[23.8,16.7,70],"Wheeler":[23.4,0.9,39],"James":[23.1,13.8,31],"Black":[23.1,9.7,94],"Ellis":[22.7,5.2,78],"Greenwood":[22.6,20.1,83],"Yates":[22.3,3.4,41],"Benson":[22.2,9.6,43],"Buckley":[22.1,-1.0,47],"Bartlett":[22.0,12.3,26],"Briggs":[21.8,6.3,89],"Powell":[21.7,6.7,55],"Webb":[21.6,4.7,36],"Cunningham":[21.5,-0.2,138],"Simpson":[21.5,5.3,113],"Francis":[21.3,5.3,50],"Fuller":[20.9,20.0,42],"Field":[20.8,21.8,48],"Phillips":[20.8,10.1,40],"Vaughan":[20.8,16.1,47],"Booth":[20.5,16.1,14],"Wells":[20.4,2.5,135],"Wilkinson":[20.3,11.2,62],"Harding":[20.1,6.1,21],"Hicks":[19.9,4.4,80],"Lawson":[19.9,-3.9,141],"Fry":[19.8,3.8,62],"Gray":[19.4,8.0,61],"Day":[19.4,7.4,59],"Miller":[19.3,5.3,125],"Fleming":[19.3,9.7,123],"Johnston":[19.3,13.2,23],"Kay":[19.3,9.3,74],"Cohen":[19.3,15.0,25],"Gordon":[19.1,3.5,142],"Robson":[19.0,29.3,22],"Morris":[18.9,13.7,29],"Dixon":[18.8,6.3,32],"Johnson":[18.7,7.5,30],"Nicholls":[18.7,2.9,90],"Thornton":[18.6,-0.5,86],"Wallace":[18.5,12.2,103],"Hay":[18.4,20.9,74],"Maxwell":[18.1,6.7,104],"Kirk":[18.0,22.9,17],"Burke":[18.0,4.9,130],"Christie":[17.6,17.1,63],"Summers":[17.5,-6.7,59],"Hooper":[17.4,11.8,22],"Stuart":[17.3,-2.8,207],"Nash":[17.3,2.4,117],"Hamilton":[17.2,10.0,31],"Seymour":[17.2,15.8,22],"Howell":[17.1,-0.3,50],"Gibson":[17.0,14.3,42],"Brooks":[16.8,7.4,34],"Lane":[16.8,1.3,44],"Boyd":[16.7,16.3,34],"Heath":[16.7,13.7,100],"Lindsay":[16.3,25.5,29],"Cooke":[16.3,2.5,88],"Armstrong":[16.3,12.5,33],"Bradley":[16.2,3.7,26],"Kennedy":[16.2,3.1,67],"Harrison":[16.2,3.9,10],"Parsons":[16.1,13.3,23],"Mercer":[16.0,10.4,42],"Fletcher":[15.9,12.5,21],"George":[15.8,0.4,49],"Thompson":[15.6,5.3,81],"Ashton":[15.5,12.2,47],"Paul":[15.5,10.2,62],"Graham":[15.4,10.8,26],"Woodward":[15.4,2.5,14],"Bruce":[15.3,4.9,77],"Wilson":[15.1,6.4,36],"Brown":[15.0,1.5,94],"Page":[14.9,7.6,69],"Nicholson":[14.9,8.6,41],"Gardner":[14.8,10.0,74],"Tucker":[14.7,1.1,82],"Rose":[14.7,5.1,18],"Stone":[14.4,3.5,46],"Myers":[14.3,-0.7,39],"Forbes":[14.3,15.7,104],"Freeman":[14.2,4.8,59],"Ward":[14.2,1.4,56],"Marsden":[14.1,4.1,3],"Mitchell":[14.0,3.1,94],"Hutchinson":[14.0,2.6,67],"Bell":[14.0,4.5,85],"Stephens":[13.9,-2.0,61],"Carter":[13.9,4.4,39],"Hardy":[13.9,-0.2,28],"Whitehead":[13.8,4.3,33],"Hutton":[13.7,-9.3,66],"Jackson":[13.6,6.2,6],"Shaw":[13.3,-1.0,26],"Pearce":[13.2,3.7,53],"Palmer":[13.1,9.3,53],"Adams":[13.0,1.8,58],"Butler":[13.0,4.9,73],"Lucas":[12.9,-2.2,105],"Barnes":[12.9,2.6,52],"Todd":[12.9,9.1,75],"Holt":[12.7,8.7,164],"Williamson":[12.7,9.4,55],"Banks":[12.7,8.3,56],"Coleman":[12.7,4.1,21],"Watson":[12.6,5.5,40],"Alexander":[12.6,4.6,39],"Hudson":[12.5,11.8,20],"Richardson":[12.5,4.0,36],"Mann":[12.3,-4.0,71],"Talbot":[12.3,-2.3,38],"Riley":[12.2,6.3,25],"Scott":[12.0,7.1,27],"Collins":[12.0,-2.7,97],"Young":[12.0,7.8,38],"Knight":[12.0,9.5,20],"Clarke":[11.9,6.6,47],"Stevens":[11.8,5.5,19],"Andrews":[11.7,4.4,50],"Dawson":[11.7,15.2,75],"Harper":[11.6,-0.2,40],"Davis":[11.5,10.9,22],"Bailey":[11.3,7.4,11],"Kelly":[11.3,8.3,52],"Osborne":[11.2,2.8,44],"Payne":[11.2,-1.0,72],"Gould":[11.1,-0.6,85],"Burton":[11.1,10.6,65],"Barrett":[11.1,0.9,24],"Newman":[11.0,6.7,31],"Gilbert":[11.0,4.4,113],"Elliott":[10.9,1.3,18],"Stokes":[10.9,7.9,21],"Watts":[10.8,10.6,51],"Ball":[10.8,7.4,47],"Rogers":[10.7,8.5,39],"Poole":[10.7,-6.7,36],"Foster":[10.6,3.6,19],"Hodgson":[10.5,25.8,66],"Carr":[10.5,-2.5,40],"Abbott":[10.5,12.5,8],"Gregory":[10.3,3.1,30],"Stephenson":[10.3,12.0,59],"Hayes":[10.1,9.6,54],"Blackburn":[10.1,-7.1,120],"Lamb":[9.8,0.4,89],"Barker":[9.8,4.3,48],"Saunders":[9.7,3.8,59],"Bennett":[9.6,3.6,22],"Walters":[9.6,1.9,24],"Baker":[9.5,3.0,94],"Beaumont":[9.5,3.3,62],"Hammond":[9.3,15.0,32],"Hope":[9.2,-0.8,120],"Warner":[9.2,3.7,50],"Hall":[9.1,4.6,19],"Smart":[9.0,-9.7,107],"Ford":[9.0,4.5,65],"Robinson":[9.0,11.0,21],"Cole":[8.9,7.1,18],"Cox":[8.9,5.9,34],"Wright":[8.8,4.9,15],"Bates":[8.7,3.2,16],"Douglas":[8.7,6.2,30],"Clark":[8.7,6.8,17],"Law":[8.7,-1.5,108],"Holmes":[8.5,6.7,52],"Chapman":[8.4,3.3,16],"West":[8.4,7.4,33],"Harris":[8.2,3.7,24],"Sharp":[8.2,9.2,6],"May":[8.2,3.9,19],"Townsend":[8.1,8.5,30],"Austin":[8.1,18.4,34],"Goodwin":[7.8,1.6,24],"Fox":[7.8,0.5,44],"Perry":[7.8,6.6,42],"Moore":[7.7,4.8,35],"Martin":[7.5,2.6,52],"Howard":[7.5,10.4,64],"Browne":[7.5,1.7,26],"Wood":[7.3,7.6,16],"Hopkins":[7.2,13.9,15],"Bishop":[7.2,4.3,37],"Lawrence":[6.9,8.9,23],"Barber":[6.9,7.2,39],"Parker":[6.9,3.7,8],"Stanley":[6.8,-0.8,28],"Mason":[6.7,-2.3,50],"Norman":[6.7,7.8,35],"Gill":[6.6,0.2,73],"Allen":[6.6,5.7,21],"Kemp":[6.4,3.1,44],"Hewitt":[6.3,5.1,26],"Cooper":[6.2,2.5,38],"Spencer":[6.2,2.1,11],"Newton":[6.2,4.7,55],"Turner":[6.1,1.4,3],"Bryant":[5.9,11.1,81],"Holland":[5.8,3.3,17],"Hancock":[5.8,0.1,34],"Pearson":[5.6,13.6,17],"Cook":[5.5,4.0,33],"Reynolds":[5.4,6.1,33],"Walker":[5.3,7.2,7],"Barton":[5.3,-2.9,32],"King":[5.3,5.3,26],"Curtis":[5.3,0.4,67],"Russell":[5.1,7.1,5],"Patterson":[5.0,-0.5,13],"Willis":[4.9,8.7,8],"Mills":[4.8,8.0,38],"Woods":[4.7,14.0,42],"Birch":[4.7,14.1,33],"Smith":[4.6,4.0,17],"Green":[4.5,4.5,8],"Fowler":[4.2,-4.5,30],"Cross":[4.2,-1.6,57],"Cotton":[4.2,6.3,35],"Walton":[4.2,15.0,27],"Dunn":[4.1,-1.1,29],"Bird":[4.0,-5.2,43],"Taylor":[4.0,5.4,14],"Baxter":[3.5,-1.7,42],"Boyle":[3.2,20.1,149],"Hill":[3.1,7.5,32],"Berry":[3.0,5.1,130],"Noble":[3.0,3.8,39],"Herbert":[3.0,15.7,28],"Marshall":[3.0,7.4,20],"Chambers":[2.9,9.1,89],"Warren":[2.9,1.7,24],"Barnett":[2.4,14.6,11],"Moss":[2.2,-3.4,17],"Morton":[2.0,8.9,71],"Norris":[1.8,6.3,20],"Savage":[1.7,-8.2,10],"White":[1.6,4.6,10],"Hart":[1.5,1.9,10],"Slater":[1.4,13.8,58],"Marsh":[1.3,7.1,24],"Oliver":[1.1,3.9,39],"Jordan":[0.8,-0.6,8],"Rice":[0.8,2.8,45],"Forster":[0.7,6.3,104],"Frost":[0.4,5.5,48],"Fisher":[0.3,11.5,51],"Burnett":[0.2,6.3,48],"Harvey":[0.1,8.1,46],"Henry":[-0.1,1.9,166],"Higgins":[-0.3,11.2,76],"Dean":[-0.3,2.4,15],"Burgess":[-0.8,7.2,39],"Lee":[-0.8,5.3,43],"Dobson":[-1.3,12.8,73],"Blake":[-1.5,2.6,36],"Webster":[-1.8,13.1,31],"Archer":[-2.9,4.3,11],"Dale":[-4.0,1.2,41],"Matthews":[-4.1,10.1,24],"Kirby":[-6.0,7.0,29],"Potter":[-8.2,-4.2,62],"Glover":[-8.3,3.0,67],"Porter":[-8.7,2.4,12],"Wade":[-9.5,-6.0,16],"Steele":[-10.2,11.3,78]}};
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const fmt = n => Math.round(n).toLocaleString("en-GB");
+const pct = v => Math.round(v * 100) + "%";
+const isDark = () => { const t = document.documentElement.dataset.theme; return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; };
+document.getElementById("themeBtn").onclick = () => { document.documentElement.dataset.theme = isDark() ? "light" : "dark"; redrawAll(); };
+const ERAS = ["1700s", "1800s", "1900 to 1949", "since 1950"], EC = i => css("--e" + i);
+const REG = R.regions, RSHORT = { "Yorkshire and the Humber": "Yorkshire", "Eastern": "East of England" }, rs = r => RSHORT[r] || r;
+const REGPOS = { "Scotland": [57.3, -4.4], "North East": [55.6, -0.9], "North West": [54.55, -4.6], "Yorkshire and the Humber": [54.25, -0.2], "East Midlands": [53.05, 0.9], "West Midlands": [52.55, -2.25],
+  "Eastern": [52.6, 2.5], "London": [51.2, 2.45], "South East": [50.45, 0.6], "South West": [50.75, -5.9], "Wales": [52.9, -5.6] };
+
+/* ===== state and data ===== */
+const S = { era: "ab", show: "name", sn: null, town: null };
+const D = { pl: null, sn: null, idx: null, names: null };
+let lmap, datL = null, nsL = null, sigL = null, landL = null, borderL = null, nameL = null, baseL = null, hillL = null, pin = null, renderer;
+const msg = document.getElementById("msg");
+const GRID = [0.25, 0.4];
+const eraList = () => S.era === "ab" ? [1, 3] : [+S.era];
+
+/* births of the chosen surname (or everyone) per birthplace, per era */
+function counts() {
+  const out = new Map();
+  if (S.show === "all") { D.pl.c.forEach((c, i) => out.set(i, c)); return out; }
+  if (S.sn == null) return out;
+  const f = D.sn.p[S.sn];
+  for (let k = 0; k < f.length; k += 3) { let c = out.get(f[k]); if (!c) out.set(f[k], c = [0, 0, 0, 0]); c[f[k + 1]] += f[k + 2]; }
+  return out;
+}
+const gridOn = () => lmap.getZoom() < 7.25;
+function drawData() {
+  if (datL) datL.remove(); datL = null;
+  if (!D.pl || S.show === "sig") return;
+  const cs = counts(), eras = eraList(), g = gridOn(), o = LY.colour / 100, dk = isDark();
+  const pts = new Map();
+  for (const [i, c] of cs) {
+    const la = D.pl.la[i] / 1e4, lo = D.pl.lo[i] / 1e4;
+    const key = g ? Math.floor(la / GRID[0]) + "_" + Math.floor(lo / GRID[1]) : "p" + i;
+    let p = pts.get(key); if (!p) pts.set(key, p = { la: 0, lo: 0, w: 0, c: [0, 0, 0, 0], pl: [] });
+    const w = c.reduce((a, b) => a + b, 0); p.la += la * w; p.lo += lo * w; p.w += w; for (let k = 0; k < 4; k++) p.c[k] += c[k]; p.pl.push(i);
+  }
+  const all = S.show === "all", z = lmap.getZoom(), k0 = all ? (g ? .55 : .9) : (g ? 3.2 : 3.8) * (z >= 9 ? 1.25 : 1);
+  datL = L.layerGroup();
+  const list = [...pts.values()].filter(p => p.w);
+  for (const e of eras.slice().sort((a, b) => a - b)) {
+    list.sort((a, b) => b.c[e] - a.c[e]);
+    for (const p of list) {
+      const n = p.c[e]; if (!n) continue;
+      const r = Math.max(all ? 1.8 : 5, k0 * Math.sqrt(n)), off = S.era === "ab" ? (e === 1 ? -1 : 1) * Math.min(4, r * .25) : 0;
+      const ll = [p.la / p.w, p.lo / p.w];
+      const m = L.circleMarker(ll, { renderer, radius: r, weight: 1.2, color: dk ? "#17171A" : "#FFFFFF", opacity: .9 * o, fillColor: EC(e), fillOpacity: (S.era === "ab" ? .62 : .78) * o });
+      if (off) m.setLatLng(lmap.containerPointToLatLng(lmap.latLngToContainerPoint(ll).add([off, 0])));
+      m.on("click", ev => { L.DomEvent.stopPropagation(ev); pointInfo(p); });
+      m.addTo(datL);
+    }
+  }
+  datL.addTo(lmap);
+}
+function drawNamesakes() {
+  if (nsL) nsL.remove(); nsL = null;
+  if (S.show !== "name" || S.sn == null || !D.sn.ns[S.sn]) return;
+  nsL = L.layerGroup();
+  for (const [la, lo, nm] of D.sn.ns[S.sn]) L.marker([la, lo], { pane: "labels", interactive: false, keyboard: false, icon: L.divIcon({ className: "nsk", html: `<i></i>${esc(nm)}`, iconSize: null, iconAnchor: [8, 8] }) }).addTo(nsL);
+  nsL.addTo(lmap);
+}
+function drawSig() {
+  if (sigL) sigL.remove(); sigL = null;
+  if (S.show !== "sig") return;
+  const e = S.era === "3" || S.era === "2" ? "since1950" : "1800s", sg = R.signature[e];
+  sigL = L.layerGroup();
+  for (const r of REG) {
+    const html = `<b>${esc(rs(r))}</b>${sg[r].slice(0, 3).map(x => `<a data-s="${esc(x[0])}">${esc(x[0])}</a>`).join("<br>")}`;
+    const m = L.marker(REGPOS[r], { pane: "labels", icon: L.divIcon({ className: "", html: `<div class="sig" style="border-left-color:${EC(e === "1800s" ? 1 : 3)}">${html}</div>`, iconSize: null, iconAnchor: [44, 30] }) });
+    m.on("add", () => m.getElement().querySelectorAll("a[data-s]").forEach(a => a.onclick = ev => { ev.preventDefault(); L.DomEvent.stopPropagation(ev); pickSurname(a.dataset.s, false); }));
+    m.addTo(sigL);
+  }
+  lmap.getPane("labels").style.pointerEvents = "auto";
+  sigL.addTo(lmap);
+}
+function redrawData() { drawData(); drawNamesakes(); drawSig(); legend(); placeNames(); }
+
+/* ===== key and information panel ===== */
+function legend() {
+  const box = document.getElementById("legend"), kt = document.getElementById("keyTitle");
+  if (S.show === "sig") { kt.textContent = "Signature surnames, " + (S.era === "3" || S.era === "2" ? "born since 1950" : "born in the 1800s"); box.innerHTML = `<div class="fig-sub" style="margin:0">The three surnames most over-represented among each region's notable births. Choose 1800s or Since 1950 above; tap a name to map it.</div>`; return; }
+  kt.textContent = S.show === "all" ? "All notable births" : (S.sn == null ? "Key" : D.sn.s[S.sn]);
+  box.innerHTML = `<div class="lg">${eraList().map(e => `<span><i class="dot" style="background:${EC(e)}"></i>born ${ERAS[e]}</span>`).join("")}${S.show === "name" && S.sn != null && D.sn.ns[S.sn] ? `<span><i class="dot" style="border:2.5px solid ${css("--ns")};border-radius:0;transform:rotate(45deg);width:10px;height:10px"></i>place of the same name</span>` : ""}</div>`;
+}
+function shareRows(c, tot) { return REG.map((r, i) => [r, c[i], tot ? c[i] / tot : 0]); }
+function surnameInfo() {
+  const i = S.sn, s = D.sn.s[i], t = D.sn.t[i], f = D.sn.p[i], reg = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]];
+  for (let k = 0; k < f.length; k += 3) reg[f[k + 1]][D.pl.rg[f[k]]] += f[k + 2];
+  const tot = t.reduce((a, b) => a + b, 0), mx = Math.max(...t);
+  let h = `<div class="big">${esc(s)}</div><div class="muted">${fmt(tot)} notable births in Great Britain since 1700</div><table>`;
+  t.forEach((v, e) => { h += `<tr><td>${ERAS[e]}</td><td class="num">${v}</td><td style="width:45%"><span class="hbar" style="width:${mx ? v / mx * 100 : 0}%;background:${EC(e)}"></span></td></tr>`; });
+  h += `</table>`;
+  const top = e => { const n = t[e]; if (n < 3) return ""; const rows = shareRows(reg[e], n).map(([r, c, sh]) => [r, c, sh, sh / D.base[e][REG.indexOf(r)]]).filter(x => x[1] >= 2 && x[3] > 1).sort((a, b) => b[3] - a[3]).slice(0, 3);
+    return rows.length ? `<div style="margin-top:6px"><b style="color:${EC(e)}">Born ${ERAS[e]}</b>: ${rows.map(x => `${esc(rs(x[0]))} ${x[1]} (${x[3].toFixed(1)}x)`).join(", ")}</div>` : ""; };
+  h += top(1) + top(3);
+  if (top(1) || top(3)) h += `<div class="muted" style="margin-top:4px">Regions with most over-representation, with births and how many times the share of all notable births.</div>`;
+  const rg = R.reg[s];
+  if (rg) h += `<div style="margin-top:8px">Regional clustering beyond chance: <b>${rg[0].toFixed(0)}</b> points in the 1800s, <b>${rg[1].toFixed(0)}</b> since 1950. Centre of gravity moved ${rg[2]} km.</div>`;
+  const ns = D.sn.ns[i];
+  if (ns) h += `<div style="margin-top:8px">Places with this name: ${ns.map(x => `${esc(x[2])} (${esc(x[3])})`).join("; ")}. A spelling match, not proof of origin.</div>`;
+  if (tot <= 3) h += `<div class="muted" style="margin-top:8px">Few notable births: too few to show a pattern.</div>`;
+  document.getElementById("info").innerHTML = h;
+}
+function pointInfo(p) {
+  const nm = p.pl.slice().sort((a, b) => sum(D.pl.c[b]) - sum(D.pl.c[a])).slice(0, 3).map(i => D.pl.nm[i]);
+  const who = S.show === "all" ? "All notable births" : D.sn.s[S.sn];
+  let h = `<div class="big">${esc(nm[0])}${p.pl.length > 1 ? " area" : ""}</div><div class="muted">${p.pl.length > 1 ? "Includes " + nm.map(esc).join(", ") + (p.pl.length > 3 ? " and " + (p.pl.length - 3) + " more birthplaces" : "") : "Birthplace"}</div><div style="margin:6px 0"><b>${esc(who)}</b></div><table>`;
+  p.c.forEach((v, e) => { h += `<tr><td><i class="dot" style="background:${EC(e)}"></i> born ${ERAS[e]}</td><td class="num">${fmt(v)}</td></tr>`; });
+  h += `</table>`;
+  if (S.show === "name") h += `<a href="#" id="backSn">Back to ${esc(who)}</a>`;
+  document.getElementById("info").innerHTML = h;
+  const b = document.getElementById("backSn"); if (b) b.onclick = ev => { ev.preventDefault(); surnameInfo(); };
+}
+const sum = a => a.reduce((x, y) => x + y, 0);
+function townInfo(t) {
+  const [la, lo, nm, area] = t, rad = 25, cosl = Math.cos(la * Math.PI / 180), near = new Set();
+  for (let i = 0; i < D.pl.la.length; i++) { const dy = (D.pl.la[i] / 1e4 - la) * 111.2, dx = (D.pl.lo[i] / 1e4 - lo) * 111.2 * cosl; if (dx * dx + dy * dy <= rad * rad) near.add(i); }
+  const loc = [0, 0, 0, 0]; for (const i of near) for (let e = 0; e < 4; e++) loc[e] += D.pl.c[i][e];
+  const res = { 1: [], 3: [] };
+  for (let j = 0; j < D.sn.s.length; j++) {
+    const f = D.sn.p[j], c = [0, 0, 0, 0]; for (let k = 0; k < f.length; k += 3) if (near.has(f[k])) c[f[k + 1]] += f[k + 2];
+    for (const e of [1, 3]) if (c[e] >= 3 && loc[e]) res[e].push([D.sn.s[j], c[e], (c[e] / loc[e]) / (D.sn.t[j][e] / D.pl.tot[e])]);
+  }
+  let h = `<div class="big">${esc(nm)}</div><div class="muted">${esc(area)}. Notable births within ${rad} km: ${fmt(loc[1])} in the 1800s, ${fmt(loc[3])} since 1950.</div>`;
+  for (const e of [1, 3]) { const r = res[e].sort((a, b) => b[2] - a[2]).slice(0, 6);
+    h += `<div style="margin-top:8px"><b style="color:${EC(e)}">Most typical surnames, born ${ERAS[e]}</b></div>` + (r.length ? `<table>${r.map(x => `<tr><td><a href="#" data-s="${esc(x[0])}">${esc(x[0])}</a></td><td class="num">${x[1]} births</td><td class="num">${x[2].toFixed(0)}x</td></tr>`).join("")}</table>` : `<div class="muted">No surname has three or more births here.</div>`); }
+  h += `<div class="muted">Surnames with at least three notable births within ${rad} km, ranked by how many times their share of local births exceeds their share of all births. Often one notable family.</div>`;
+  const box = document.getElementById("info"); box.innerHTML = h;
+  box.querySelectorAll("a[data-s]").forEach(a => a.onclick = ev => { ev.preventDefault(); pickSurname(a.dataset.s, false); });
+}
+function scrollToMap() { const el = document.getElementById("lmap"), r = el.getBoundingClientRect(); if (r.top < 0 || r.bottom > innerHeight) el.scrollIntoView({ behavior: "smooth", block: innerWidth < 700 ? "start" : "center" }); }
+
+/* ===== map layers: base map, hills, place names, borders, colour strength ===== */
+const LY = { base: "auto", hills: true, hillK: 30, names: true, nameLvl: 1, lines: true, lineK: 55, colour: 100 };
+const LYDEF = { ...LY };
+try { Object.assign(LY, JSON.parse(localStorage.getItem("sbp_layers") || "{}")); } catch (e) {}
+const saveLY = () => { try { localStorage.setItem("sbp_layers", JSON.stringify(LY)); } catch (e) {} };
+const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/";
+function initLayers() {
+  const Ctl = L.Control.extend({ options: { position: "topright" }, onAdd() {
+    const d = L.DomUtil.create("div"); L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d);
+    d.innerHTML = `<button class="lyrBtn" aria-expanded="false" aria-controls="lyrPanel">Map layers</button>
+<div class="lyrPanel" id="lyrPanel" hidden>
+ <div class="row"><label style="font-weight:600">Base map</label><span></span><div class="sub"><span>style</span><select id="lyBase" aria-label="Base map"><option value="auto">Match the theme</option><option value="light">Light grey</option><option value="dark">Dark grey</option><option value="none">None (plain land)</option></select></div></div>
+ <div class="row"><label><input type="checkbox" id="lyHills"> Hills</label><span></span><div class="sub"><span>strength</span><input type="range" id="lyHillK" min="10" max="100" step="5" aria-label="Hill shading strength"></div></div>
+ <div class="row"><label><input type="checkbox" id="lyNames"> Place names</label><span></span><div class="sub"><span>how many</span><select id="lyNameLvl" aria-label="How many place names"><option value="0">Cities only</option><option value="1">Cities and towns</option><option value="2">Down to villages</option></select></div></div>
+ <div class="row"><label><input type="checkbox" id="lyLines"> Coast and borders</label><span></span><div class="sub"><span>strength</span><input type="range" id="lyLineK" min="10" max="100" step="5" aria-label="Border line strength"></div></div>
+ <div class="row"><label style="font-weight:600">Circles</label><span></span><div class="sub"><span>strength</span><input type="range" id="lyColour" min="20" max="100" step="5" aria-label="Circle strength"></div></div>
+ <button class="reset" id="lyReset">Reset layers</button>
+</div>`;
+    return d; } });
+  lmap.addControl(new Ctl());
+  const q = id => document.getElementById(id), btn = lmap.getContainer().querySelector(".lyrBtn"), pan = q("lyrPanel");
+  btn.onclick = () => { const o = pan.hidden; pan.hidden = !o; btn.setAttribute("aria-expanded", o); };
+  const sync = () => { q("lyBase").value = LY.base; q("lyHills").checked = LY.hills; q("lyHillK").value = LY.hillK; q("lyNames").checked = LY.names; q("lyNameLvl").value = LY.nameLvl; q("lyLines").checked = LY.lines; q("lyLineK").value = LY.lineK; q("lyColour").value = LY.colour; };
+  const on = (id, ev, f) => q(id).addEventListener(ev, e => { f(e.target); saveLY(); applyLayers(); });
+  on("lyBase", "change", t => LY.base = t.value);
+  on("lyHills", "change", t => LY.hills = t.checked); on("lyHillK", "input", t => { LY.hillK = +t.value; LY.hills = true; q("lyHills").checked = true; });
+  on("lyNames", "change", t => LY.names = t.checked); on("lyNameLvl", "change", t => { LY.nameLvl = +t.value; LY.names = true; q("lyNames").checked = true; });
+  on("lyLines", "change", t => LY.lines = t.checked); on("lyLineK", "input", t => { LY.lineK = +t.value; LY.lines = true; q("lyLines").checked = true; });
+  on("lyColour", "change", t => { LY.colour = +t.value; lastColour = null; });
+  q("lyReset").onclick = () => { Object.assign(LY, LYDEF); saveLY(); sync(); lastColour = null; applyLayers(); };
+  sync();
+  lmap.on("zoomend moveend", placeNames);
+}
+let baseKey = null, lastColour = null;
+function applyLayers() {
+  if (!lmap) return;
+  const want = LY.base === "auto" ? (isDark() ? "dark" : "light") : LY.base;
+  if (want !== baseKey) {
+    if (baseL) baseL.remove(); baseL = null; baseKey = want;
+    if (want !== "none") baseL = L.tileLayer(ESRI + `Canvas/World_${want === "dark" ? "Dark" : "Light"}_Gray_Base/MapServer/tile/{z}/{y}/{x}`, { pane: "base", maxZoom: 16, attribution: "Tiles © Esri" }).addTo(lmap);
+  }
+  if (LY.hills) { if (!hillL) hillL = L.tileLayer(ESRI + "Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}", { pane: "hills", maxZoom: 16, attribution: "Hillshade © Esri" }); hillL.addTo(lmap); hillL.setOpacity(.08 + LY.hillK / 100 * .5); }
+  else if (hillL) hillL.remove();
+  if (landL) landL.setStyle({ fillColor: css("--land"), color: css("--muted"), fillOpacity: want === "none" ? 1 : 0, opacity: .55 });
+  if (borderL) { if (LY.lines) { borderL.addTo(lmap); borderL.setStyle({ color: css("--fg"), opacity: .15 + LY.lineK / 100 * .85 }); } else borderL.remove(); }
+  if (D.pl && lastColour !== LY.colour) { lastColour = LY.colour; drawData(); }
+  placeNames();
+}
+function placeNames() {
+  if (!lmap || !nameL) return;
+  nameL.clearLayers(); if (!LY.names || !D.names || S.show === "sig") { nameL.remove(); return; } nameL.addTo(lmap);
+  const z = lmap.getZoom(), bb = lmap.getBounds().pad(.05), lvl = LY.nameLvl, N = D.names;
+  const minR = lvl === 0 ? (z >= 7 ? 4 : 5) : lvl === 1 ? (z >= 9.5 ? 3 : z >= 7 ? 4 : 5) : (z >= 9 ? 1 : z >= 7.5 ? 3 : z >= 6.5 ? 4 : 5);
+  const cand = [];
+  for (let i = 0; i < N.n.length; i++) if (N.r[i] >= minR) { const la = N.la[i] / 1e4, lo = N.lo[i] / 1e4; if (bb.contains([la, lo])) cand.push([N.r[i], la, lo, N.n[i]]); }
+  cand.sort((a, b) => b[0] - a[0]);
+  const boxes = [], seen = new Set(); let n = 0;
+  for (const [r, la, lo, nm] of cand) {
+    if (seen.has(nm)) continue;
+    const pt = lmap.latLngToContainerPoint([la, lo]), fs = r >= 3 ? 11 : 10, bx = [pt.x - 4, pt.y - 8, pt.x + 10 + nm.length * fs * .62, pt.y + 7];
+    if (boxes.some(o => bx[0] < o[2] && bx[2] > o[0] && bx[1] < o[3] && bx[3] > o[1])) continue;
+    boxes.push(bx); seen.add(nm);
+    L.marker([la, lo], { pane: "labels", interactive: false, keyboard: false, icon: L.divIcon({ className: "city" + (r <= 1 ? " r1" : ""), html: `<i></i>${esc(nm)}`, iconSize: null, iconAnchor: [3, 6] }) }).addTo(nameL);
+    if (++n >= 200) break;
+  }
+}
+function initMap() {
+  if (!window.L) { document.getElementById("lmap").innerHTML = '<p style="padding:16px">The map library did not load.</p>'; return false; }
+  lmap = L.map("lmap", { zoomSnap: .25, zoomDelta: .5, minZoom: 4.5, maxZoom: 13, scrollWheelZoom: false, maxBounds: L.latLngBounds([48.5, -12], [62, 5]) });
+  lmap.fitBounds([[49.9, -7.6], [60.9, 1.8]], { padding: [4, 4] });
+  lmap.attributionControl.setPrefix('<a href="https://leafletjs.com">Leaflet</a>');
+  for (const [p, z] of [["landp", 150], ["base", 200], ["hills", 250], ["dat", 400], ["bord", 420], ["labels", 650]]) lmap.createPane(p).style.zIndex = z;
+  lmap.getPane("hills").style.pointerEvents = "none"; lmap.getPane("bord").style.pointerEvents = "none"; lmap.getPane("labels").style.pointerEvents = "none";
+  renderer = L.canvas({ pane: "dat", padding: .3, tolerance: 3 });
+  nameL = L.layerGroup();
+  lmap.attributionControl.addAttribution("Wikidata, CC0 | Contains OS data © Crown copyright and database right 2026 | ONS, OGL");
+  lmap.on("click", () => lmap.scrollWheelZoom.enable());
+  let lastG = null;
+  lmap.on("zoomend", () => { const g = gridOn(); if (g !== lastG || !g) { lastG = g; drawData(); } });
+  initLayers();
+  return true;
+}
+function setPin(la, lo) { if (pin) pin.remove(); pin = L.marker([la, lo], { interactive: false, icon: L.divIcon({ className: "", html: '<div class="pin"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(lmap); }
+
+/* ===== loading ===== */
+const J = u => fetch(u).then(r => { if (!r.ok) throw new Error(u); return r.json(); });
+async function load() {
+  if (!initMap()) return;
+  try { const [pl, sn, nm, outline] = await Promise.all([J("data/page/places.json"), J("data/page/surnames.json"), J("data/page/names.json"), J("data/page/outline.json")]);
+    D.pl = pl; D.sn = sn; D.names = nm; D.outline = outline; }
+  catch (e) { msg.textContent = "The map data did not load. Try reloading the page."; return; }
+  D.idx = new Map(D.sn.s.map((s, i) => [s.toLowerCase(), i]));
+  D.base = [0, 1, 2, 3].map(e => { const c = new Array(REG.length).fill(0); D.pl.c.forEach((x, i) => c[D.pl.rg[i]] += x[e]); const t = sum(c); return c.map(v => v / t); });
+  landL = L.geoJSON(D.outline.land, { pane: "landp", interactive: false, style: { weight: .6, color: css("--muted"), fillColor: css("--land"), fillOpacity: 0 } }).addTo(lmap);
+  borderL = L.geoJSON(D.outline.borders, { pane: "bord", interactive: false, style: { weight: 1.3, dashArray: "5 4", color: css("--fg"), opacity: .6 } });
+  msg.textContent = "";
+  lmap.invalidateSize(); lmap.fitBounds([[49.9, -7.6], [60.9, 1.8]], { padding: [4, 4] });
+  applyLayers();
+  pickSurname(R.default_surname, false, true);
+}
+function redrawAll() { if (!lmap) return; baseKey = null; lastColour = null; applyLayers(); redrawData(); drawCharts(); }
+
+/* ===== controls ===== */
+function setPressed(id, attr, val) { document.querySelectorAll(`#${id} .btn`).forEach(b => b.setAttribute("aria-pressed", b.dataset[attr] === val)); }
+document.querySelectorAll("#eraBtns .btn").forEach(b => b.onclick = () => { S.era = b.dataset.e; setPressed("eraBtns", "e", S.era); redrawData(); });
+document.querySelectorAll("#showBtns .btn").forEach(b => b.onclick = () => setShow(b.dataset.s));
+function setShow(v) {
+  S.show = v; setPressed("showBtns", "s", v);
+  if (v !== "sig") lmap.getPane("labels").style.pointerEvents = "none";
+  if (v === "sig" && S.era !== "1" && S.era !== "3") { S.era = "1"; setPressed("eraBtns", "e", "1"); }
+  redrawData();
+  if (v === "all") document.getElementById("info").innerHTML = `<div class="big">All notable births</div><div class="muted">${fmt(sum(D.pl.tot))} people. London and the big cities dominate. Tap a circle for the counts there.</div>`;
+  else if (v === "name" && S.sn != null) surnameInfo();
+  else if (v === "sig") document.getElementById("info").innerHTML = `<div class="muted">Each label lists the surnames most over-represented among the region's notable births. Many are one notable family rather than a local name.</div>`;
+}
+function pickSurname(s, scroll, init) {
+  if (!D.idx) return false;
+  const i = D.idx.get(s.toLowerCase()); if (i == null) return false;
+  S.sn = i; if (S.show !== "name") setShow("name"); else redrawData();
+  surnameInfo();
+  if (!init) {
+    const f = D.sn.p[i], b = []; for (let k = 0; k < f.length; k += 3) b.push([D.pl.la[f[k]] / 1e4, D.pl.lo[f[k]] / 1e4]);
+    if (D.sn.ns[i]) for (const x of D.sn.ns[i]) b.push([x[0], x[1]]);
+    if (b.length) lmap.fitBounds(L.latLngBounds(b).pad(.25), { maxZoom: 8.5, padding: [20, 20] });
+    if (pin) { pin.remove(); pin = null; }
+    scrollToMap();
+  }
+  document.getElementById("q").value = D.sn.s[i];
+  return true;
+}
+const quick = document.getElementById("quick");
+for (const s of R.quick) { const b = document.createElement("button"); b.className = "btn"; b.textContent = s; b.onclick = () => pickSurname(s, true); quick.appendChild(b); }
+document.getElementById("hothamLink").onclick = ev => { ev.preventDefault(); pickSurname("Hotham", true); };
+
+/* search: surnames first, then towns */
+const norm = s => s.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9 ]/g, "");
+function combo(inputId, listId, search, pick) {
+  const inp = document.getElementById(inputId), ul = document.getElementById(listId); let items = [], k = -1;
+  const close = () => { ul.style.display = "none"; inp.setAttribute("aria-expanded", "false"); k = -1; };
+  const render = () => { ul.innerHTML = items.map((it, j) => `<li role="option" aria-selected="${j === k}" data-j="${j}">${it.html}</li>`).join(""); ul.style.display = items.length ? "block" : "none"; inp.setAttribute("aria-expanded", items.length ? "true" : "false"); };
+  inp.addEventListener("input", () => { items = search(inp.value.trim()); k = -1; render(); });
+  inp.addEventListener("keydown", e => { if (e.key === "ArrowDown") { k = Math.min(items.length - 1, k + 1); render(); e.preventDefault(); } else if (e.key === "ArrowUp") { k = Math.max(0, k - 1); render(); e.preventDefault(); } else if (e.key === "Enter") { const it = items[k >= 0 ? k : 0]; if (it) { pick(it); inp.value = it.label; close(); } e.preventDefault(); } else if (e.key === "Escape") close(); });
+  ul.addEventListener("mousedown", e => { const li = e.target.closest("li"); if (!li) return; const it = items[+li.dataset.j]; pick(it); inp.value = it.label; close(); e.preventDefault(); });
+  inp.addEventListener("blur", () => setTimeout(close, 150));
+}
+combo("q", "sug", v => {
+  if (!D.sn || v.length < 2) return []; const n = norm(v), out = [];
+  for (let i = 0; i < D.sn.s.length && out.length < 400; i++) { const m = norm(D.sn.s[i]); if (m.startsWith(n)) out.push([m === n ? 0 : 1, -sum(D.sn.t[i]), { label: D.sn.s[i], html: `${esc(D.sn.s[i])} <span>surname, ${fmt(sum(D.sn.t[i]))} births</span>`, sn: D.sn.s[i] }]); }
+  const N = D.names; for (let i = 0; i < N.n.length; i++) { if (N.r[i] < 1) continue; const m = norm(N.n[i]); if (m.startsWith(n)) out.push([m === n ? 2 : 3, -N.r[i], { label: N.n[i], html: `${esc(N.n[i])} <span>place, ${esc(N.a[i])}</span>`, town: [N.la[i] / 1e4, N.lo[i] / 1e4, N.n[i], N.a[i]] }]); }
+  out.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  if (!out.length) return [{ label: v, html: `<span>No surname with two or more notable births starts like that.</span>` }];
+  return out.slice(0, 14).map(x => x[2]);
+}, it => {
+  if (it.sn) pickSurname(it.sn, true);
+  else if (it.town) { const t = it.town; if (S.show !== "all") setShow("all"); lmap.setView([t[0], t[1]], 9.25); setPin(t[0], t[1]); townInfo(t); scrollToMap(); }
+});
+
+/* ===== charts ===== */
+const cw = id => Math.max(300, Math.min(680, document.getElementById(id).clientWidth || 640));
+function svgEl(w, h, inner, lab) { return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(lab)}">${inner}</svg>`; }
+const gridX = (x, H, ticks, lab) => ticks.map(g => `<line x1="${x(g)}" x2="${x(g)}" y1="0" y2="${H - 22}" stroke="${css("--rule")}"/><text x="${x(g)}" y="${H - 6}" text-anchor="middle" font-size="11" fill="${css("--muted")}">${lab(g)}</text>`).join("");
+function regChart() {
+  const W = cw("regChart"), sm = W < 520, L0 = sm ? 112 : 170, rh = 30, H = REG.length * rh + 58, mx = .3, x = v => L0 + v / mx * (W - L0 - 46);
+  let s = gridX(x, H - 20, [0, .1, .2, .3], pct);
+  const order = REG.slice().sort((a, b) => R.ov[1][b] - R.ov[1][a]);
+  order.forEach((r, j) => { const y = j * rh;
+    s += `<text x="${L0 - 8}" y="${y + 18}" text-anchor="end" font-size="${sm ? 11 : 12.5}">${esc(rs(r))}</text>`;
+    [1, 3].forEach((e, k) => { const v = R.ov[e][r]; s += `<rect x="${L0}" y="${y + 4 + k * 11}" width="${Math.max(1, x(v) - L0)}" height="10" fill="${EC(e)}"><title>born ${ERAS[e]}: ${pct(v)}</title></rect><text x="${x(v) + 4}" y="${y + 13 + k * 11}" font-size="10">${pct(v)}</text>`; }); });
+  const ly = H - 12; s += `<rect x="${L0}" y="${ly}" width="11" height="11" fill="${EC(1)}"/><text x="${L0 + 15}" y="${ly + 10}" font-size="11">born 1800s</text><rect x="${L0 + 110}" y="${ly}" width="11" height="11" fill="${EC(3)}"/><text x="${L0 + 125}" y="${ly + 10}" font-size="11">born since 1950</text>`;
+  document.getElementById("regChart").innerHTML = svgEl(W, H, s, "Bars of the share of notable births in each region, 1800s and since 1950");
+}
+function scatChart() {
+  const W = cw("scatChart"), H = Math.min(W, 520), L0 = 46, B = 40, mx = .62, mn = -.06;
+  const x = v => L0 + (v - mn) / (mx - mn) * (W - L0 - 14), y = v => H - B - (v - mn) / (mx - mn) * (H - B - 10);
+  let s = "";
+  for (let g = 0; g <= .6; g += .1) s += `<line x1="${x(g)}" x2="${x(g)}" y1="${y(mx)}" y2="${y(mn)}" stroke="${css("--rule")}"/><line x1="${x(mn)}" x2="${x(mx)}" y1="${y(g)}" y2="${y(g)}" stroke="${css("--rule")}"/><text x="${x(g)}" y="${H - B + 16}" text-anchor="middle" font-size="11" fill="${css("--muted")}">${Math.round(g * 100)}</text><text x="${L0 - 6}" y="${y(g) + 4}" text-anchor="end" font-size="11" fill="${css("--muted")}">${Math.round(g * 100)}</text>`;
+  s += `<line x1="${x(mn)}" y1="${y(mn)}" x2="${x(mx)}" y2="${y(mx)}" stroke="${css("--fg")}" stroke-dasharray="5 4"/>`;
+  s += `<text x="${x(mx)}" y="${H - 4}" text-anchor="end" font-size="11.5">born in the 1800s</text><text x="${L0 + 4}" y="${y(mx) + 12}" font-size="11.5">born since 1950</text>`;
+  const lab = new Set(R.scat_labels);
+  for (const [n, a, b, na, nb] of R.scatter) { const big = Math.sqrt(na + nb);
+    s += `<circle class="go" data-s="${esc(n)}" cx="${x(a)}" cy="${y(b)}" r="${Math.min(9, 2.2 + big * .22)}" fill="${b < a ? EC(1) : EC(3)}" fill-opacity=".55" stroke="${css("--bg")}" stroke-width=".8" style="cursor:pointer"><title>${esc(n)}: ${Math.round(a * 100)} then, ${Math.round(b * 100)} now</title></circle>`;
+    if (lab.has(n)) s += `<text x="${x(a) + 7}" y="${y(b) + 4}" font-size="11">${esc(n)}</text>`; }
+  const el = document.getElementById("scatChart"); el.innerHTML = svgEl(W, H, s, "Scatter of regional clustering by surname, 1800s against since 1950");
+  el.querySelectorAll(".go").forEach(c => c.onclick = () => pickSurname(c.dataset.s, true));
+}
+function barsEra(id, rows, lab) {   // rows: [label, value, baseline]
+  const W = cw(id), rh = 40, L0 = W < 520 ? 104 : 140, H = rows.length * rh + 58, mx = Math.max(...rows.map(r => Math.max(r[1], r[2]))) * 1.15, x = v => L0 + v / mx * (W - L0 - 50);
+  const tk = mx > .5 ? [0, .2, .4, .6, .8] : mx > .1 ? [0, .05, .1, .15, .2] : [0, .02, .04, .06, .08];
+  let s = gridX(x, H - 22, tk.filter(t => t <= mx), v => (v * 100).toFixed(mx > .1 ? 0 : 0) + "%");
+  rows.forEach(([lb, v, b, e], j) => { const y = j * rh;
+    s += `<text x="${L0 - 8}" y="${y + 16}" text-anchor="end" font-size="12">${esc(lb)}</text><rect x="${L0}" y="${y + 4}" width="${Math.max(1, x(v) - L0)}" height="16" fill="${EC(e)}"/><text x="${x(v) + 4}" y="${y + 16}" font-size="11">${(v * 100).toFixed(v < .1 ? 1 : 0)}%</text>
+    <rect x="${L0}" y="${y + 23}" width="${Math.max(1, x(b) - L0)}" height="7" fill="${css("--muted")}" opacity=".55"/><text x="${x(b) + 4}" y="${y + 30}" font-size="10" fill="${css("--muted")}">${(b * 100).toFixed(b < .1 ? 1 : 0)}%</text>`; });
+  const ly = H - 2; s += `<rect x="${L0}" y="${ly - 9}" width="20" height="7" fill="${css("--muted")}" opacity=".55"/><text x="${L0 + 26}" y="${ly - 2}" font-size="11" fill="${css("--muted")}">${esc(lab)}</text>`;
+  document.getElementById(id).innerHTML = svgEl(W, H, s, "Bar chart by era");
+}
+function nrsChart() {
+  const W = cw("nrsChart"), H = Math.min(W * .8, 440), L0 = 44, B = 40, lx = v => Math.log10(v);
+  const xs = R.nrs.map(r => r[1]), x0 = lx(Math.min(...xs) * .9), x1 = lx(Math.max(...xs) * 1.1), ymx = Math.max(...R.nrs.map(r => r[2])) * 1.08;
+  const x = v => L0 + (lx(v) - x0) / (x1 - x0) * (W - L0 - 14), y = v => H - B - v / ymx * (H - B - 10);
+  let s = "";
+  for (const g of [200, 300, 500, 1000, 2000]) if (lx(g) >= x0 && lx(g) <= x1) s += `<line x1="${x(g)}" x2="${x(g)}" y1="8" y2="${H - B}" stroke="${css("--rule")}"/><text x="${x(g)}" y="${H - B + 16}" text-anchor="middle" font-size="11" fill="${css("--muted")}">${fmt(g)}</text>`;
+  for (let g = 0; g <= ymx; g += 20) s += `<line x1="${L0}" x2="${W - 10}" y1="${y(g)}" y2="${y(g)}" stroke="${css("--rule")}"/><text x="${L0 - 6}" y="${y(g) + 4}" text-anchor="end" font-size="11" fill="${css("--muted")}">${g}</text>`;
+  s += `<text x="${W - 12}" y="${H - 4}" text-anchor="end" font-size="11.5">entries in Scotland's registers, 2025</text><text x="${L0 + 4}" y="18" font-size="11.5">notable births in Scotland since 1950</text>`;
+  const lab = new Set(R.nrs_labels);
+  for (const [n, a, b] of R.nrs) { s += `<circle class="go" data-s="${esc(n)}" cx="${x(a)}" cy="${y(b)}" r="4" fill="${EC(3)}" fill-opacity=".6" style="cursor:pointer"><title>${esc(n)}: ${fmt(a)} entries, ${b} notable</title></circle>`; if (lab.has(n)) s += `<text x="${x(a) + 6}" y="${y(b) + 4}" font-size="11">${esc(n)}</text>`; }
+  const el = document.getElementById("nrsChart"); el.innerHTML = svgEl(W, H, s, "Scatter of register entries against notable births for Scotland's commonest surnames");
+  el.querySelectorAll(".go").forEach(c => c.onclick = () => { const s2 = c.dataset.s; if (!pickSurname(s2, true) && D.idx) for (const [k, i] of D.idx) if (k === s2.toLowerCase()) pickSurname(D.sn.s[i], true); });
+}
+function sigTable() {
+  let h = `<tr><th>Region</th><th>Born in the 1800s</th><th>Born since 1950</th></tr>`;
+  for (const r of REG) h += `<tr><td>${esc(rs(r))}</td>${["1800s", "since1950"].map(e => `<td>${R.signature[e][r].slice(0, 3).map(x => `<a data-s="${esc(x[0])}">${esc(x[0])}</a>`).join(", ")}</td>`).join("")}</tr>`;
+  const t = document.getElementById("sigTable"); t.innerHTML = h;
+  t.querySelectorAll("a[data-s]").forEach(a => a.onclick = () => pickSurname(a.dataset.s, true));
+}
+function welshCards() {
+  const box = document.getElementById("welshCards"); box.innerHTML = "";
+  for (const [n, a, sa, b, sb] of R.welsh_names.slice(0, 6)) { const c = document.createElement("button"); c.className = "card"; c.style.borderTopColor = EC(1);
+    c.innerHTML = `<b>${esc(n)}</b><div class="big">${pct(sa)} <span style="font-size:15px">to</span> ${pct(sb)}</div>born in Wales: ${a} notables born in the 1800s, ${b} since 1950.`; c.onclick = () => pickSurname(n, true); box.appendChild(c); }
+}
+function drawCharts() {
+  regChart(); scatChart(); nrsChart();
+  barsEra("welshChart", [["1700s", R.welsh[0][0], R.welsh[0][1], 0], ["1800s", R.welsh[1][0], R.welsh[1][1], 1], ["1900 to 1949", R.welsh[2][0], R.welsh[2][1], 2], ["Since 1950", R.welsh[3][0], R.welsh[3][1], 3]], "all notable births born in Wales");
+  barsEra("cornChart", [["1700s", R.corn[0][0], R.corn[0][1], 0], ["1800s", R.corn[1][0], R.corn[1][1], 1], ["1900 to 1949", R.corn[2][0], R.corn[2][1], 2], ["Since 1950", R.corn[3][0], R.corn[3][1], 3]], "all notable births born in Cornwall");
+  barsEra("pnChart", [["1700s", R.pn[0][0], R.pn[0][1], 0], ["1800s", R.pn[1][0], R.pn[1][1], 1], ["1900 to 1949", R.pn[2][0], R.pn[2][1], 2], ["Since 1950", R.pn[3][0], R.pn[3][1], 3]], "expected if born like all notables");
+}
+sigTable(); welshCards(); drawCharts();
+let rsT = null; addEventListener("resize", () => { clearTimeout(rsT); rsT = setTimeout(drawCharts, 200); });
+load();
+</script>
+<!-- map-fullscreen v1 -->
+<style id="mfs-style">
+.mfs-btn{position:absolute;top:10px;right:10px;z-index:1001;width:34px;height:34px;border:2px solid rgba(0,0,0,.25);border-radius:4px;background:#fff;color:#222;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.mfs-btn:hover{background:#f2f2f2}
+.mfs-btn svg{width:18px;height:18px}
+.mfs-host.mfs-btn-left .mfs-btn{right:auto;left:54px}
+.mfs-fake{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;z-index:100000!important;border-radius:0!important}
+html.mfs-lock,html.mfs-lock body{overflow:hidden!important}
+:fullscreen.mfs-host{width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;margin:0!important;border-radius:0!important}
+</style>
+<script id="mfs-script">
+(function(){
+  var ICON_OPEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+  var ICON_CLOSE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
+  function poke(){setTimeout(function(){window.dispatchEvent(new Event('resize'));},60);setTimeout(function(){window.dispatchEvent(new Event('resize'));},400);}
+  function realFS(){return document.fullscreenElement||document.webkitFullscreenElement;}
+  function add(el){
+    if(el.__mfs)return; el.__mfs=1;
+    var cs=getComputedStyle(el); if(cs.position==='static')el.style.position='relative';
+    el.classList.add('mfs-host');
+    // avoid clashing with a top-right Leaflet control (e.g. "Map layers")
+    var tr=el.querySelector('.leaflet-top.leaflet-right');
+    if(tr&&tr.children.length){ el.classList.add('mfs-btn-left'); }
+    var b=document.createElement('button'); b.type='button'; b.className='mfs-btn';
+    b.title='Full screen map'; b.setAttribute('aria-label','Full screen map'); b.innerHTML=ICON_OPEN;
+    ['click','dblclick','mousedown','touchstart','wheel'].forEach(function(t){b.addEventListener(t,function(e){e.stopPropagation();},{passive:t!=='click'});});
+    function setIcon(on){b.innerHTML=on?ICON_CLOSE:ICON_OPEN;b.title=on?'Exit full screen':'Full screen map';b.setAttribute('aria-label',b.title);}
+    function exitFake(){el.classList.remove('mfs-fake');document.documentElement.classList.remove('mfs-lock');setIcon(false);poke();}
+    b.addEventListener('click',function(e){
+      e.preventDefault();
+      if(el.classList.contains('mfs-fake')){exitFake();return;}
+      if(realFS()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);return;}
+      var req=el.requestFullscreen||el.webkitRequestFullscreen;
+      if(req){ try{ var p=req.call(el); if(p&&p.catch)p.catch(function(){el.classList.add('mfs-fake');document.documentElement.classList.add('mfs-lock');setIcon(true);poke();}); }catch(err){el.classList.add('mfs-fake');document.documentElement.classList.add('mfs-lock');setIcon(true);poke();} }
+      else { el.classList.add('mfs-fake');document.documentElement.classList.add('mfs-lock');setIcon(true);poke(); }
+    });
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&el.classList.contains('mfs-fake'))exitFake();});
+    ['fullscreenchange','webkitfullscreenchange'].forEach(function(t){document.addEventListener(t,function(){setIcon(realFS()===el);poke();});});
+    el.appendChild(b);
+  }
+  function scan(){
+    var els=document.querySelectorAll('[data-fullscreen-map], .leaflet-container, .maplibregl-map, .mapboxgl-map');
+    els.forEach(function(el){
+      if(el.closest('.mfs-host')&&!el.classList.contains('mfs-host'))return;
+      var r=el.getBoundingClientRect(); if(r.width<200||r.height<150)return;
+      add(el);
+    });
+  }
+  function start(){scan(); var n=0; var t=setInterval(function(){scan(); if(++n>20)clearInterval(t);},500);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start); else start();
+})();
+</script>
+<!-- /map-fullscreen -->
+</body>
+</html>
