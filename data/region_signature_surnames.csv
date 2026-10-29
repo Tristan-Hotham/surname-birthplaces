@@ -1,0 +1,111 @@
+era,region,rank,surname,births_in_region,births_all_gb,location_quotient
+1800s,Scotland,1,Hutchison,14,14,6.02
+1800s,Scotland,2,Wedderburn,10,10,6.02
+1800s,Scotland,3,Watt,14,14,6.02
+1800s,Scotland,4,McEwan,9,9,6.02
+1800s,Scotland,5,McKenzie,16,17,5.67
+1800s,North East,1,Elliot,6,10,17.5
+1800s,North East,2,Headlam,6,12,14.59
+1800s,North East,3,Liddell,6,12,14.59
+1800s,North East,4,Grey,9,23,11.41
+1800s,North East,5,Robson,9,26,10.1
+1800s,North West,1,Ashworth,7,8,9.69
+1800s,North West,2,Royle,6,8,8.31
+1800s,North West,3,Parkinson,10,15,7.38
+1800s,North West,4,Nuttall,6,9,7.38
+1800s,North West,5,Crompton,6,9,7.38
+1800s,Yorkshire and the Humber,1,Stansfield,12,15,14.76
+1800s,Yorkshire and the Humber,2,Lupton,6,8,13.84
+1800s,Yorkshire and the Humber,3,Firth,7,10,12.91
+1800s,Yorkshire and the Humber,4,Rhodes,9,25,6.64
+1800s,Yorkshire and the Humber,5,Briggs,7,24,5.38
+1800s,East Midlands,1,Hind,7,14,7.58
+1800s,East Midlands,2,Lowe,12,26,7.0
+1800s,East Midlands,3,Riley,6,16,5.69
+1800s,East Midlands,4,Sutton,6,19,4.79
+1800s,East Midlands,5,Townsend,7,23,4.62
+1800s,West Midlands,1,Parkes,9,11,13.07
+1800s,West Midlands,2,Perry,8,21,6.08
+1800s,West Midlands,3,Wheeler,7,20,5.59
+1800s,West Midlands,4,Kirk,6,18,5.32
+1800s,West Midlands,5,Banks,6,21,4.56
+1800s,Eastern,1,Bertram,7,13,12.02
+1800s,Eastern,2,Rose,6,30,4.47
+1800s,Eastern,3,Palmer,9,58,3.46
+1800s,Eastern,4,Cox,7,51,3.06
+1800s,Eastern,5,Johnson,13,109,2.66
+1800s,London,1,Gordon-Lennox,10,11,3.84
+1800s,London,2,Rothschild,9,10,3.8
+1800s,London,3,Barraud,8,9,3.76
+1800s,London,4,Piesse,7,8,3.7
+1800s,London,5,Weale,7,8,3.7
+1800s,South East,1,Henty,7,9,9.09
+1800s,South East,2,Wyndham,8,17,5.5
+1800s,South East,3,Davenport,6,16,4.38
+1800s,South East,4,Hoare,6,19,3.69
+1800s,South East,5,Carpenter,9,31,3.39
+1800s,South West,1,Hazeland,11,11,12.73
+1800s,South West,2,Batten,7,10,8.91
+1800s,South West,3,Trefusis,8,13,7.83
+1800s,South West,4,Wills,8,16,6.36
+1800s,South West,5,Carroll,6,12,6.36
+1800s,Wales,1,Rees,34,40,10.47
+1800s,Wales,2,John,10,13,9.47
+1800s,Wales,3,Hamer,6,8,9.24
+1800s,Wales,4,Davies,257,343,9.23
+1800s,Wales,5,Griffith,32,43,9.16
+since1950,Scotland,1,McLaren,14,16,7.26
+since1950,Scotland,2,McKinnon,7,8,7.26
+since1950,Scotland,3,Gallacher,14,17,6.84
+since1950,Scotland,4,Docherty,9,11,6.79
+since1950,Scotland,5,Hamill,8,10,6.64
+since1950,North East,1,Ridley,7,11,11.26
+since1950,North East,2,Liddle,6,10,10.62
+since1950,North East,3,Robson,18,38,8.38
+since1950,North East,4,Davison,8,17,8.33
+since1950,North East,5,Tait,8,18,7.86
+since1950,North West,1,Morley,9,12,6.06
+since1950,North West,2,Mellor,9,13,5.6
+since1950,North West,3,Ashworth,8,12,5.39
+since1950,North West,4,Nuttall,8,12,5.39
+since1950,North West,5,McLoughlin,6,10,4.85
+since1950,Yorkshire and the Humber,1,Whitaker,9,10,11.27
+since1950,Yorkshire and the Humber,2,Hirst,9,11,10.25
+since1950,Yorkshire and the Humber,3,Dyson,6,12,6.26
+since1950,Yorkshire and the Humber,4,Dobson,8,20,5.01
+since1950,Yorkshire and the Humber,5,Kirk,7,19,4.62
+since1950,East Midlands,1,Spencer-Churchill,6,10,8.63
+since1950,East Midlands,2,Hanson,6,24,3.6
+since1950,East Midlands,3,Herbert,6,25,3.45
+since1950,East Midlands,4,Higgins,6,27,3.2
+since1950,East Midlands,5,Palmer,15,68,3.17
+since1950,West Midlands,1,Brookes,9,13,10.45
+since1950,West Midlands,2,Ali,6,15,6.04
+since1950,West Midlands,3,Birch,7,22,4.81
+since1950,West Midlands,4,Heath,6,20,4.53
+since1950,West Midlands,5,Bradley,9,32,4.25
+since1950,Eastern,1,Barber,6,25,3.93
+since1950,Eastern,2,Norris,7,33,3.48
+since1950,Eastern,3,Day,8,47,2.79
+since1950,Eastern,4,Henry,6,44,2.23
+since1950,Eastern,5,King,16,118,2.22
+since1950,London,1,Boateng,8,8,4.75
+since1950,London,2,Merton,9,9,4.75
+since1950,London,3,Wellesley,7,8,4.16
+since1950,London,4,Shah,9,11,3.89
+since1950,London,5,Patel,9,13,3.29
+since1950,South East,1,Bartlett,8,23,3.57
+since1950,South East,2,Fuller,8,24,3.42
+since1950,South East,3,Middleton,9,29,3.19
+since1950,South East,4,Benson,6,20,3.08
+since1950,South East,5,Keen,6,20,3.08
+since1950,South West,1,Way,6,9,12.15
+since1950,South West,2,Bryant,7,22,5.8
+since1950,South West,3,Parsons,6,29,3.77
+since1950,South West,4,Newman,8,40,3.65
+since1950,South West,5,Harding,7,40,3.19
+since1950,Wales,1,Llewellyn,7,13,8.98
+since1950,Wales,2,Rees,18,36,8.34
+since1950,Wales,3,Evans,118,259,7.6
+since1950,Wales,4,Davies,141,313,7.51
+since1950,Wales,5,Owen,26,63,6.88
