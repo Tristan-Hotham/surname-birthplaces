@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this data or code, please cite it as below."
+title: "Has Your Surname Left Home? Birthplaces of Notable People by Surname in Great Britain, 1800 to 1899 and 1950 Onwards"
+type: dataset
+authors:
+  - family-names: Hotham
+    given-names: Tristan
+    orcid: "https://orcid.org/0000-0003-4931-9349"
+    affiliation: "Independent researcher"
+doi: "10.5281/zenodo.23761427"
+url: "https://maps.tristanhotham.com/surname-birthplaces/"
+repository-code: "https://github.com/Tristan-Hotham/surname-birthplaces"
+license: CC-BY-4.0
+keywords:
+  - "surnames"
+  - "family names"
+  - "Wikidata"
+  - "regional geography"
+  - "Great Britain"
+  - "Welsh surnames"
+  - "Cornish surnames"
+  - "toponymic surnames"
+  - "notability bias"
+  - "open data"
